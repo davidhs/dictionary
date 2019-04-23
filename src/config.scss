@@ -1,0 +1,40 @@
+
+// 12 dálka útlit
+
+// Hámarksbreidd
+$max-width: 1400px;
+
+// Bil
+$gutter: 30px;
+
+// Leturgerðir
+$font-main: 'Open Sans', helvetica, arial, sans-serif;
+$font-heading: 'Noto Serif', georgia, serif;
+
+$color-font: #222; // letur / bakgrunnur
+$color-background: #eee; // bakgrunnur / letur
+$color-gray: #ccc; // grár
+$color-invalid: #4e1d04; // rauður, ógild gildi
+
+$transition: 250ms ease-in-out; // hröðun
+
+
+@mixin row() {
+  display: flex;
+
+  margin-left: -($gutter / 2);
+  margin-right: -($gutter / 2);
+}
+
+@mixin columns($col: 1) {
+  // margföldum með "1%" til að breyta gildi í prósentu gildi
+  width: ($col / 12 * 100) * 1%;
+
+  padding-left: $gutter / 2;
+  padding-right: $gutter / 2;
+}
+
+@mixin offset-left($cols: 0) {
+  margin-left: ($cols/12 * 100) * 1%;
+}
+

@@ -1,14 +1,33 @@
-import React, { Component } from 'react';
+import React from 'react';
+import Helmet from 'react-helmet';
+import { Route, Switch, withRouter } from 'react-router-dom';
 
-import './App.css';
 import Home from './routes/home/Home';
+import NotFound from './routes/system-pages/NotFound';
 
-class App extends Component {
-  render() {
-    return (
-      <Home />
-    );
-  }
+import './App.scss';
+
+type Props = {
+  location: Location;
+};
+
+function App(props: Props) {
+  return (
+    <React.Fragment>
+      <Helmet defaultTitle="Test" />
+
+      <div className="app">
+
+        <main className="main__content">
+          <Switch location={props.location}>
+            <Route path="/" exact component={Home} />
+            <Route component={NotFound} />
+          </Switch>
+        </main>
+
+      </div>
+    </React.Fragment>
+  );
 }
 
-export default App;
+export default withRouter(App);

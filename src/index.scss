@@ -1,0 +1,42 @@
+@import './config.scss';
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html { /* stylelint-disable-line */
+  box-sizing: border-box;
+  overflow-x: hidden;
+
+  font-family: $font-main;
+  font-size: 14px;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  overflow-y: scroll;
+
+  font-size: 14px;
+  font-family: $font-main;
+}
+
+main { /* stylelint-disable-line */
+  max-width: $max-width;
+  margin: 0 auto;
+}
+
+img { /* stylelint-disable-line */
+  max-width: 100%;
+}
+
+// --------------------------------------
+
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-heading;
+}
+

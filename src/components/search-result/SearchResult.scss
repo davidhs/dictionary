@@ -1,0 +1,23 @@
+
+
+.SearchResult__item {
+
+}
+
+.SearchResult__button {
+
+  width: 100%;
+  outline: none;
+
+  font-family: Arial;
+  color: #000;
+  font-size: 12px;
+  background: #f1f1f1;
+  padding: 5px;
+  text-decoration: none;
+}
+
+.SearchResult__button:hover {
+  background: #e4e4e4;
+  text-decoration: none;
+}

@@ -1,0 +1,48 @@
+
+
+.App {
+  display: flex;
+  flex-direction: row;
+  margin: 4px;
+}
+
+
+
+.App__main {
+  display: flex;
+  flex-direction: column;
+  margin: 4px;
+  border: 1px solid #ccc;
+}
+
+.App__search {
+  margin-bottom: 4px;
+}
+
+.App__searchInput {
+  outline: none;
+}
+
+
+.App__result {
+  outline: none;
+}
+
+
+.App__searchClear {
+
+  outline: none;
+
+  font-family: Arial;
+  color: #000;
+  font-size: 12px;
+  background: #f1f1f1;
+  padding: 2px 20px;
+  text-decoration: none;
+}
+
+
+.SearchResult__button:hover {
+  background: #e4e4e4;
+  text-decoration: none;
+}
