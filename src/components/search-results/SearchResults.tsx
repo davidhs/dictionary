@@ -4,21 +4,23 @@ import api from "../../api";
 import SearchResult from '../search-result/SearchResult';
 
 interface Props {
-  query: string;
+  query?: string;
   onSelection: (term: string) => void;
+  terms?: string[];
 }
 
-class SearchResults extends Component<Props> {
+interface State {
+}
+
+class SearchResults extends Component<Props, State> {
 
   render() {
-    const { query, onSelection } = this.props;
-
-    const results = api.searchTermsAndDescriptions(query).slice(0, 20);
+    const { onSelection, query, terms } = this.props;
 
     return (
       <div className="SearchResults">
-        <ul className="SearchResults__list">{results && results.map((result, idx) => (
-          <SearchResult key={idx} term={result} onSelection={onSelection} />
+        <ul className="SearchResults__list">{ terms && terms.map((term, idx) => (
+          <SearchResult key={idx} term={term} onSelection={onSelection} />
         ))}</ul>
       </div>
     );

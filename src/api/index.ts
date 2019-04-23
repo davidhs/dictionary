@@ -35,40 +35,87 @@ export function searchTerms(query: string) {
   return keys;
 }
 
+
+
 export function searchTermsAndDescriptions(query: string) {
   const prefix = `${NAMESPACE}:`;
 
+  // If the query starts with `s` and we have multiple terms that start
+  // with `s` then those terms should be on the top.
 
-  const escapedQuery = escapeRegExp(query.trim());
+  const escapedQuery = escapeRegExp(query.trim().toLowerCase());
+
+  // All terms under consideration (i.e. belong to the corrent namespace)
+  const allTerms = Object.keys(localStorage).filter(x => x.startsWith(prefix)).map(x => x.substr(prefix.length));
+
+  if (escapedQuery.length === 0) {
+    return allTerms.sort();
+  }
+
+  const startsWithRegex = new RegExp(`^${escapedQuery}.*`);
+  const notStartsHasRegex = new RegExp(`.+${escapedQuery}.*`);
+  const hasRegex = new RegExp(`.*${escapedQuery}.*`);
 
 
-  const regexString = `.*${escapedQuery}.*`;
 
-  const regex = new RegExp(regexString);
+  // Terms that we encounter we "mark" them so that if they're encounted again
+  // they are ignored.
+  const markedTerms = new Set<string>();
 
-  const keys = Object.keys(localStorage).filter(x => x.startsWith(prefix)).map(x => x.substr(prefix.length));
-
-  const rks = new Set<string>();
-
-  keys.forEach((key) => {
-    if (key.match(regex) !== null) {
-      rks.add(key);
+  // Terms which start with the query string
+  const termsStartingWithQuery = allTerms.filter(term => {
+    if (markedTerms.has(term)) {
+      return false;
     }
+
+    if (term.match(startsWithRegex) !== null) {
+      markedTerms.add(term);
+      return true;
+    }
+
+    return false;
+  }).sort((a, b) => {
+    return a.length - b.length;
   });
 
-  keys.forEach((key) => {
-    const v = get(key);
+  // Later, we want to sort terms by similarity.
 
-    if (typeof v !== 'undefined' && v.match(regex) !== null) {
-      rks.add(key);
+  const termsWithMatchingTerms = allTerms.filter(term => {
+    if (markedTerms.has(term)) {
+      return false;
     }
+
+    if (term.match(notStartsHasRegex) !== null) {
+      markedTerms.add(term);
+      return true;
+    } 
+    return false;
+  }).sort((a, b) => {
+    return a.length - b.length;
   });
 
-  const rk: string[] = [];
+  const termsWithMatchingDescription = allTerms.filter(term => {
 
-  rks.forEach(key => rk.push(key));
+    if (markedTerms.has(term)) {
+      return false;
+    }
 
-  return rk.sort();
+    const v = get(term);
+
+    if (typeof v !== 'undefined' && v.match(hasRegex) !== null) {
+      markedTerms.add(term);
+      return true;
+    }
+    return false;
+  }).sort();
+
+  const termsResult = [
+    ...termsStartingWithQuery,
+    ...termsWithMatchingTerms,
+    ...termsWithMatchingDescription,
+  ];
+
+  return termsResult;
 }
 
 export function remove(key: string) {
@@ -77,18 +124,17 @@ export function remove(key: string) {
 }
 
 export function set(key: string, value: any) {
-
-
   const lskey = `${NAMESPACE}:${key}`;
   const lsvalue = JSON.stringify({ value });
-
 
   localStorage.setItem(lskey, lsvalue);
 }
 
 export function get(key: string) {
 
-  const lskey = `${NAMESPACE}:${key}`;
+  const transformedKey = key.trim().toLowerCase();
+
+  const lskey = `${NAMESPACE}:${transformedKey}`;
 
   const rawItem = localStorage.getItem(lskey);
   if (rawItem === null) {
@@ -99,9 +145,6 @@ export function get(key: string) {
 }
 
 export function doExport() {
-  console.info('Exporting...');
-
-  
   const prefix = `${NAMESPACE}:`;
 
 
@@ -126,9 +169,6 @@ export function doExport() {
 }
 
 export function doImport(exportObject: ExportObject) {
-  console.info('Importing...');
-  console.info(exportObject);
-
   exportObject.terms.forEach((exportTerm) => {
     
     // Replace or merge?
@@ -140,7 +180,6 @@ export function doImport(exportObject: ExportObject) {
 
     set(key, value);
   });
-
 
   return {};
 }

@@ -31,8 +31,6 @@ class ExportButton extends React.Component<Props, State> {
 
       const content = getContent();
 
-      console.info(content);
-
       // Content here should be a JSON data structure.
       const uriEncodedString = encodeURIComponent(content);
 

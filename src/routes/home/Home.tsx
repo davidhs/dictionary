@@ -13,106 +13,7 @@ function leftpad(str: string|number, pad: string) {
   return String(pad + str).slice(-pad.length);
 }
 
-class Home extends Component {
-  state = {
-    resultText: '',
-    searchValue: '',
-  };
-
-  componentDidMount() {
-    const { searchValue } = this.state;
-
-    const result = api.get(searchValue);
-
-    if (typeof result === "string") {
-      this.setState({ resultText: result });
-    } else {
-      if (this.state.resultText.length > 0) {
-        this.setState({ resultText: "" });
-      }
-    }
-  }
-
-  onTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const resultText = e.target.value;
-
-    this.setState({
-      resultText
-    });
-
-    this.save(this.state.searchValue, resultText);
-  };
-
-  setSearchValue = (searchValue: string) => {
-    this.setState({ searchValue });
-
-    const result = api.get(searchValue);
-
-    if (typeof result === "string") {
-      this.setState({ resultText: result });
-    } else {
-      if (this.state.resultText.length > 0) {
-        this.setState({ resultText: "" });
-      }
-    }
-  };
-
-  onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-
-    this.setSearchValue(query);
-  };
-
-  save(title: string, description: string) {
-    const key = title.trim().toLowerCase();
-    const value = description.trim();
-
-    if (key.length > 0) {
-      if (value.length > 0) {
-        api.set(key, value);
-      } else {
-        api.remove(key);
-      }
-    }
-  }
-
-  handleSelection = (term: string) => {
-    this.setSearchValue(term);
-  };
-
-  onSaveChanges = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    this.save(this.state.searchValue, this.state.resultText);
-
-    // Force rerender
-    this.setState({ state: this.state });
-  };
-
-  clear = () => {
-    this.setSearchValue("");
-  };
-
-  handleSearchValueChange = (searchValue: string) => {
-    this.setSearchValue(searchValue);
-  }
-
-  onImport = (text: string) => {
-    api.doImport(JSON.parse(text));
-    this.setState(this.state);
-  }
-
-  createExportData = () => {
-    return JSON.stringify(api.doExport());
-  }
-
-  handleClearEverything = () => {
-    api.clear();
-    this.setState(this.state);
-  }
-
-  render() {
-
-    const { searchValue, resultText } = this.state;
-
+function getDateNowString() {
     // date
     const d = new Date();
 
@@ -124,60 +25,199 @@ class Home extends Component {
     ds += leftpad(d.getMinutes(), "00");
     ds += leftpad(d.getSeconds(), "00");
 
+    return ds;
+}
 
+interface Props {
+
+}
+
+interface State {
+  resultText: string;
+  searchValue: string;
+  placeholderText: string;
+  terms: string[];
+}
+
+const defaultPlaceholderText = '';
+
+class Home extends Component<Props, State> {
+
+  state: State = {
+    resultText: '',
+    searchValue: '',
+    placeholderText: defaultPlaceholderText,
+    terms: []
+  };
+
+  // Custom methods
+
+  setSearchValue = (searchValue: string) => {
+    this.setState({ searchValue });
+
+    const resultText = api.get(searchValue);
+    const terms = api.searchTermsAndDescriptions(searchValue).slice(0, 20);
+
+
+    if (typeof resultText === "string") {
+      this.setState({ resultText });
+    } else {
+      if (this.state.resultText.length > 0) {
+        this.setState({ resultText: "" });
+
+      }
+    }
+
+    if (searchValue.trim().length > 0 && terms.length > 0) {
+      const key = terms[0];
+      const placeholderText = api.get(key);
+
+      if (placeholderText) {
+        this.setState({ placeholderText });
+      }
+    } else {
+      
+      const { placeholderText } = this.state;
+
+      if (placeholderText !== defaultPlaceholderText) {
+        
+        this.setState({ placeholderText: defaultPlaceholderText });
+      }
+    }
+
+    this.setState({ terms })
+  };
+
+  setTermDescription(title: string, description: string) {
+
+    const { searchValue } = this.state;
+
+    const key = title.trim().toLowerCase();
+    const value = description;
+
+    
+    if (key.length > 0) {
+      if (value.length > 0) {
+        api.set(key, value);
+      } else {
+        api.remove(key);
+      }
+    }
+
+    this.setSearchValue(searchValue);
+
+    // this.forceRerender();
+  }
+
+  forceRerender() {
+    this.setState({});
+  }
+
+  // Lifecycle methods
+
+  componentDidMount() {
+    const { searchValue } = this.state;
+
+    this.setSearchValue(searchValue);
+  }
+
+  // Handlers
+
+  handleOnChangeTextArea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+
+    const { target: { value: resultText } } = e;
+    const { searchValue } = this.state;
+
+    this.setState({
+      resultText
+    });
+
+    this.setTermDescription(searchValue, resultText);
+  };
+
+  handleOnSelection = (term: string) => {
+    this.setSearchValue(term);
+  };
+
+  handleOnChangeSearchValue = (searchValue: string) => {
+    this.setSearchValue(searchValue);
+  }
+
+  handleOnImport = (text: string) => {
+    api.doImport(JSON.parse(text));
+    this.forceRerender();
+  }
+
+  handleOnClearEverything = () => {
+    api.clear();
+    this.forceRerender();
+  }
+
+  handleGetContent = () => {
+    return JSON.stringify(api.doExport());
+  }
+
+  // Render
+
+  render() {
+
+    const { searchValue, resultText, placeholderText, terms } = this.state;
+
+    const ds = getDateNowString();
     const filename = `dictionary-${ds}.json`;
 
     return (
       <div className="Home">
-
         <div className="Home__content">
-
           <div className="Home__top">
             <ImportButton
-              onImport={this.onImport}
-              style={{ border: 'none' }}>
+              onImport={this.handleOnImport}
+              style={{ border: 'none' }}
+            >
               Import
             </ImportButton>
             <ExportButton
-              getContent={this.createExportData}
+              getContent={this.handleGetContent}
               filename={filename}
-              style={{ borderTop: 'none', borderBottom: 'none' }}>
+              style={{ borderTop: 'none', borderBottom: 'none' }}
+            >
               Export
             </ExportButton>
           </div>
-
           <div className="Home__center">
             <SearchResults
+              terms={terms}
               query={searchValue}
-              onSelection={this.handleSelection}
+              onSelection={this.handleOnSelection}
             />
-
             <div className="Home__main"
-              style={{ borderLeft: 'none' }}>
-
-              <InputSearch value={searchValue} onChange={this.handleSearchValueChange} />
-
+              style={{ borderLeft: 'none' }}
+            >
+              <InputSearch 
+                value={searchValue}
+                suggestions={terms}
+                onChange={this.handleOnChangeSearchValue}
+              />
               <textarea
                 className="Home__result"
-                onChange={this.onTextAreaChange}
+                onChange={this.handleOnChangeTextArea}
                 rows={20}
                 cols={50}
                 value={resultText}
-                placeholder="Description..."
+                placeholder={placeholderText}
                 spellCheck={false}
               />
             </div>
           </div>
-
           <div className="Home__bottom">
             <ConfirmationButton
-              onClick={this.handleClearEverything}
+              onClick={this.handleOnClearEverything}
               confirmationMessage={'Are you sure you want to delete all the terms?'}
-              style={{ backgroundColor: 'rgb(255, 180, 180)', color: 'rgb(180, 0, 0)', borderColor: 'rgb(255, 140, 140)' }}>
+              style={{ backgroundColor: 'rgb(255, 180, 180)', color: 'rgb(180, 0, 0)', borderColor: 'rgb(255, 140, 140)' }}
+            >
               DELETE EVERYTHING
             </ConfirmationButton>
           </div>
-
         </div>
       </div>
     );
