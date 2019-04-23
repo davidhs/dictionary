@@ -32,9 +32,18 @@ class InputSearch extends React.Component<Props, State> {
           const topSuggestion = suggestions[0];
           const { value } = this.props;
 
-          if (value !== topSuggestion) {
-            e.preventDefault();
-            this.setSearchValue(topSuggestion);
+          if (e.key === 'Tab') {
+            if (value) {
+
+              if (value !== topSuggestion && topSuggestion.startsWith(value)) {
+                e.preventDefault();
+                this.setSearchValue(topSuggestion);
+              }
+            }
+          } else {
+            if (value !== topSuggestion) {
+              this.setSearchValue(topSuggestion);
+            }
           }
         }
       }
