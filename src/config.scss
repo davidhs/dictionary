@@ -1,6 +1,8 @@
 
 // 12 dálka útlit
 
+@import url('https://fonts.googleapis.com/css?family=Noto+Serif|Open+Sans');
+
 // Hámarksbreidd
 $max-width: 1400px;
 
@@ -11,10 +13,29 @@ $gutter: 30px;
 $font-main: 'Open Sans', helvetica, arial, sans-serif;
 $font-heading: 'Noto Serif', georgia, serif;
 
-$color-font: #222; // letur / bakgrunnur
-$color-background: #eee; // bakgrunnur / letur
+$font-size: 12px;
+
+
+$color-border-soft: rgb(202, 202, 202);
+
+$color-font: rgb(27, 27, 27); // letur / bakgrunnur
+$color-font-placeholder: #818181;
+
+
+$color-button-background: rgb(241, 241, 241);
+$color-button-hover-background: rgb(226, 226, 226);
+$color-button-active-background: rgb(207, 207, 207);
+
+
+// Background color
+$color-window-background: rgb(253, 253, 253);
+$color-background: rgb(248, 248, 248);
+
+
 $color-gray: #ccc; // grár
 $color-invalid: #4e1d04; // rauður, ógild gildi
+
+
 
 $transition: 250ms ease-in-out; // hröðun
 

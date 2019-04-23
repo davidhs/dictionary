@@ -1,0 +1,28 @@
+@import '../../config.scss';
+
+.Button {
+
+  border: none;
+  outline: none;
+  text-decoration: none;
+  
+  font-family: $font-main;
+  color: $color-font;
+  background: $color-button-background;
+  padding: 4px 20px;
+  text-decoration: none;
+
+  border: 1px solid $color-border-soft;
+
+  font-size: $font-size;
+}
+
+ 
+.Button:hover {
+  background: $color-button-hover-background;
+  text-decoration: none;
+}
+
+.Button:active {
+  background: $color-button-active-background;
+}

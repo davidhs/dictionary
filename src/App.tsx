@@ -14,11 +14,11 @@ type Props = {
 function App(props: Props) {
   return (
     <React.Fragment>
-      <Helmet defaultTitle="Test" />
+      <Helmet defaultTitle="Dictionary" />
 
-      <div className="app">
+      <div className="App">
 
-        <main className="main__content">
+        <main className="App__main">
           <Switch location={props.location}>
             <Route path="/" exact component={Home} />
             <Route component={NotFound} />

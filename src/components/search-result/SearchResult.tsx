@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./SearchResult.scss";
-import api from "../../api";
+import Button from "../button/Button";
 
 interface Props {
   term: string;
@@ -11,7 +11,7 @@ class SearchResult extends Component<Props> {
 
   handleClick = () => {
 
-    const { term, onSelection  } = this.props;
+    const { term, onSelection } = this.props;
     onSelection(term);
   }
 
@@ -20,7 +20,11 @@ class SearchResult extends Component<Props> {
 
     return (
       <li className="SearchResult__item">
-      <button onClick={this.handleClick} className="SearchResult__button">{term}</button>
+        <Button
+          style={{ width: '100%', borderTop: 'none', borderLeft: 'none', borderRight: 'none' }}
+          onClick={this.handleClick}>
+          {term}
+        </Button>
       </li>
     );
   }

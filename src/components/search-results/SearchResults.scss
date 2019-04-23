@@ -1,12 +1,14 @@
-
+@import '../../config.scss';
 
 .SearchResults {
   display: flex;
-
   flex-direction: column;
-  margin: 4px;
-
-  border: 1px solid #999;
-
+  border: 1px solid $color-border-soft;
   min-width: 200px;
+  background-color: $color-window-background;
+
+}
+
+.SearchResults__list {
+  list-style-type: none;
 }

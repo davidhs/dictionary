@@ -1,0 +1,53 @@
+@import '../../config.scss';
+
+.InputSearch {
+    display: flex;
+    flex-direction: rogw;
+    background-color: rgb(247, 247, 247);
+    
+}
+  
+.InputSearch__input {
+    outline: none;
+    border: none;
+
+    border-left: 1px solid $color-border-soft;
+    border-right: 1px solid $color-border-soft;
+
+    padding: 4px;
+
+    display: block;
+    flex-grow: 1;
+    background-color: $color-window-background;
+}
+
+.InputSearch__label {
+    
+    padding-left: 8px;
+    padding-right: 8px;
+
+    display: flex;
+
+    align-items: center;
+
+    color: $color-font;
+}
+
+.InputSearch__search {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+}
+  
+.InputSearch__clear {
+    outline: none;
+    border: none;
+  
+    font-family: $font-main;
+    color: $color-font;
+    background: #f1f1f1;
+    padding: 4px 20px;
+    text-decoration: none;
+
+    font-size: $font-size;
+  }

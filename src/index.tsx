@@ -7,6 +7,7 @@ import './index.scss';
 import App from './App';
 
 
+/*
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
@@ -25,6 +26,17 @@ ReactDOM.render(
         <App />
       </BrowserRouter>
     </Provider>
+  ),
+  document.getElementById('root'),
+);
+
+*/
+
+ReactDOM.render(
+  (
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   ),
   document.getElementById('root'),
 );

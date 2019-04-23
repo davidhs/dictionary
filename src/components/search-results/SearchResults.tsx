@@ -17,7 +17,7 @@ class SearchResults extends Component<Props> {
 
     return (
       <div className="SearchResults">
-        <ul>{results && results.map((result, idx) => (
+        <ul className="SearchResults__list">{results && results.map((result, idx) => (
           <SearchResult key={idx} term={result} onSelection={onSelection} />
         ))}</ul>
       </div>
