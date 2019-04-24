@@ -276,7 +276,7 @@ class Home extends Component<Props, State> {
 
     const { namespace, namespaces } = this.state;
 
-    if (namespaces.includes(namespace)) {
+    if (namespaces.includes(namespace) || namespace.trim() === '*') {
       this.setSearchValue(searchValue);
     } else {
       this.setNamespace(searchValue);
@@ -369,28 +369,44 @@ class Home extends Component<Props, State> {
       if (suggestions.length > 0) {
         const topSuggestion = suggestions[0];
 
-        if (e.key === "Tab") {
+        if (derived) {
+          if (
+            lookupValue !== topSuggestion &&
+            topSuggestion.startsWith(lookupValue)
+          ) {
+
+            e.preventDefault();
+            return `${space1}${derivedNamespace}${space2}:${space3}${topSuggestion}${space4}`;
+          }
+        } else if (namespace === "*") {
+          // Degenerate case
+
+          e.preventDefault();
+          return topSuggestion;
+        } else {
           if (
             lookupValue !== topSuggestion &&
             topSuggestion.startsWith(lookupValue)
           ) {
             e.preventDefault();
-
-            if (derived) {
-              return `${space1}${derivedNamespace}${space2}:${space3}${topSuggestion}${space4}`;
-            } else {
-              return topSuggestion;
-            }
-          }
-        } else {
-          if (lookupValue !== topSuggestion) {
-            if (derived) {
-              return `${space1}${derivedNamespace}${space2}:${space3}${topSuggestion}${space4}`;
-            } else {
-              return topSuggestion;
-            }
+            return topSuggestion;
           }
         }
+
+        if (
+          lookupValue !== topSuggestion &&
+          topSuggestion.startsWith(lookupValue)
+        ) {
+          e.preventDefault();
+
+          if (derived) {
+            return `${space1}${derivedNamespace}${space2}:${space3}${topSuggestion}${space4}`;
+          } else {
+            return topSuggestion;
+          }
+        }
+
+
       }
     }
 
@@ -421,8 +437,8 @@ class Home extends Component<Props, State> {
       if (namespace === "*") {
         listedTerms = flattenedTerms;
       } else {
-        listedTerms = namespaces.filter(namespace =>
-          namespace.startsWith(searchValue)
+        listedTerms = namespaces.filter(ns =>
+          ns.startsWith(namespace)
         );
       }
     }
