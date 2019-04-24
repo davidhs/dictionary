@@ -307,6 +307,14 @@ class Home extends Component<Props, State> {
     const namespace = e.target.value.trim();
 
     this.setNamespace(namespace);
+
+    if (namespace.length === 0) {
+
+      const { placeholderText } = this.state;
+
+      this.setSearchValue('');
+      this.setState({ placeholderText: '' })
+    }
   };
 
   autocomplete = (

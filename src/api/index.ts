@@ -281,10 +281,19 @@ export function doExport() {
 
 export function doImport(importObject: ImportObject) {
 
-  if (importObject.hasOwnProperty('dictionary')) {
+  console.info('Import object:', importObject);
+
+  if (importObject.hasOwnProperty('dictionaries')) {
     const obj = importObject as ExportObject;
 
-    obj.dictionaries.forEach((dictionary) => {
+    const { dictionaries } = obj;
+
+    console.info('Dictionaries:', dictionaries);
+
+    dictionaries.forEach((dictionary) => {
+
+      console.info('dictionary: ', dictionary);
+
       const { namespace, terms } = dictionary;
 
       terms.forEach((termObject) => {
