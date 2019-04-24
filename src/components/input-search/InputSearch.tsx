@@ -7,6 +7,34 @@ interface Props {
   onChange?: (value: string) => void;
   value?: string;
   suggestions?: string[];
+  autocomplete?: (event: React.KeyboardEvent<HTMLInputElement>, value: string, suggestions: string[]) => string;
+}
+
+
+const defaultAutocomplete = (e: React.KeyboardEvent<HTMLInputElement>, value: string, suggestions: string[]) => {
+  if (e.key === 'Enter' || e.key === 'Tab') {
+
+    if (suggestions) {
+      if (suggestions.length > 0) {
+        const topSuggestion = suggestions[0];
+
+        if (e.key === 'Tab') {
+          if (value) {
+            if (value !== topSuggestion && topSuggestion.startsWith(value)) {
+              e.preventDefault();
+              return topSuggestion;
+            }
+          }
+        } else {
+          if (value !== topSuggestion) {
+            return topSuggestion;
+          }
+        }
+      }
+    }
+  }
+
+  return value;
 }
 
 interface State {
@@ -24,28 +52,18 @@ class InputSearch extends React.Component<Props, State> {
   }
 
   handleOnKeyDownSearchValue = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      const { suggestions } = this.props;
-      
-      if (suggestions) {
-        if (suggestions.length > 0) {
-          const topSuggestion = suggestions[0];
-          const { value } = this.props;
 
-          if (e.key === 'Tab') {
-            if (value) {
+    const { autocomplete, value, suggestions } = this.props;
 
-              if (value !== topSuggestion && topSuggestion.startsWith(value)) {
-                e.preventDefault();
-                this.setSearchValue(topSuggestion);
-              }
-            }
-          } else {
-            if (value !== topSuggestion) {
-              this.setSearchValue(topSuggestion);
-            }
-          }
-        }
+    if (autocomplete) {
+      if (value && suggestions) {
+        const autocompleteValue = autocomplete(e, value, suggestions)
+        this.setSearchValue(autocompleteValue);
+      }
+    } else {
+      if (value && suggestions) {
+        const autocompleteValue = defaultAutocomplete(e, value, suggestions)
+        this.setSearchValue(autocompleteValue);
       }
     }
   }

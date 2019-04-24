@@ -1,7 +1,11 @@
 
 
 
-const NAMESPACE = 'fish';
+const LOCAL_STORAGE_NAMESPACE = 'tu8rbgh8';
+
+const ALL_PREFIX = `${LOCAL_STORAGE_NAMESPACE}::`;
+
+const DEFAULT_NAMESPACE = 'default';
 
 
 interface ExportTerm {
@@ -9,9 +13,22 @@ interface ExportTerm {
   description: string;
 }
 
-interface ExportObject {
+interface Legacy1ExportObject {
   terms: ExportTerm[];
 }
+
+interface ExportSubdictionary {
+  namespace: string;
+  terms: ExportTerm[];
+}
+
+interface ExportObject {
+  dictionaries: ExportSubdictionary[];
+}
+
+
+type ImportObject = ExportObject | Legacy1ExportObject;
+
 
 
 function escapeRegExp(string: string) {
@@ -19,122 +36,195 @@ function escapeRegExp(string: string) {
 }
 
 
-export function searchTerms(query: string) {
-  const prefix = `${NAMESPACE}:`;
+export function searchTermsAndDescriptions(paramQuery: string, paramNamespace: string) {
 
+  const namespace = paramNamespace.trim().toLowerCase();
 
-  const escapedQuery = escapeRegExp(query.trim());
+  const isFullsearch = namespace === '*';
 
+  const query = paramQuery.trim().toLowerCase();
 
-  const regexString = `.*${escapedQuery}.*`;
+  const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
 
-  const regex = new RegExp(regexString);
+  let namespaceExists = false;
 
-  const keys = Object.keys(localStorage).filter(x => x.startsWith(prefix)).map(x => x.substr(prefix.length)).filter(x => x.match(regex) !== null).sort();
+  const namespacesSet = new Set<string>();
 
-  return keys;
-}
+  const allTerms = Object.keys(localStorage)
+    .filter(lskey => lskey.startsWith(lsprefix))
+    .map(lskey => {
+      const namespacedKey = lskey.substr(lsprefix.length);
 
+      const colonIdx = namespacedKey.indexOf(':');
 
+      const lspnamespace = namespacedKey.substring(0, colonIdx);
+      const lspkey = namespacedKey.substring(colonIdx + 1, namespacedKey.length);
 
-export function searchTermsAndDescriptions(query: string) {
-  const prefix = `${NAMESPACE}:`;
+      if (namespace === lspnamespace) {
+        namespaceExists = true;
+      }
+
+      namespacesSet.add(lspnamespace);
+
+      return {
+        namespace: lspnamespace,
+        key: lspkey
+      }
+    }).filter(namespacedKey => {
+      if (namespaceExists) {
+        return namespacedKey.namespace === namespace;
+      } else {
+        // Let everything through
+        return true;
+      }
+    });
+
+  const namespaceList = Array.from(namespacesSet).sort();
+
 
   // If the query starts with `s` and we have multiple terms that start
   // with `s` then those terms should be on the top.
 
-  const escapedQuery = escapeRegExp(query.trim().toLowerCase());
-
-  // All terms under consideration (i.e. belong to the corrent namespace)
-  const allTerms = Object.keys(localStorage).filter(x => x.startsWith(prefix)).map(x => x.substr(prefix.length));
+  const escapedQuery = escapeRegExp(query);
 
   if (escapedQuery.length === 0) {
-    return allTerms.sort();
+
+
+
+    const returnObject = {
+      terms: allTerms.sort(),
+      namespaceExists,
+      namespaces: namespaceList,
+    };
+
+    return returnObject;
   }
 
   const startsWithRegex = new RegExp(`^${escapedQuery}.*`);
   const notStartsHasRegex = new RegExp(`.+${escapedQuery}.*`);
   const hasRegex = new RegExp(`.*${escapedQuery}.*`);
 
-
-
   // Terms that we encounter we "mark" them so that if they're encounted again
   // they are ignored.
   const markedTerms = new Set<string>();
 
   // Terms which start with the query string
-  const termsStartingWithQuery = allTerms.filter(term => {
-    if (markedTerms.has(term)) {
+  const termsStartingWithQuery = allTerms.filter(namespacedKey => {
+
+    const fullkey = `${namespacedKey.namespace}:${namespacedKey.key}`
+
+    if (markedTerms.has(fullkey)) {
       return false;
     }
 
-    if (term.match(startsWithRegex) !== null) {
-      markedTerms.add(term);
+    if (namespacedKey.key.match(startsWithRegex) !== null) {
+      markedTerms.add(fullkey);
       return true;
     }
 
     return false;
   }).sort((a, b) => {
-    return a.length - b.length;
+    return a.key.length - b.key.length;
   });
 
   // Later, we want to sort terms by similarity.
 
-  const termsWithMatchingTerms = allTerms.filter(term => {
-    if (markedTerms.has(term)) {
+  const termsWithMatchingTerms = allTerms.filter(namespacedKey => {
+    const fullkey = `${namespacedKey.namespace}:${namespacedKey.key}`
+
+    if (markedTerms.has(fullkey)) {
       return false;
     }
 
-    if (term.match(notStartsHasRegex) !== null) {
-      markedTerms.add(term);
+    if (namespacedKey.key.match(notStartsHasRegex) !== null) {
+      markedTerms.add(fullkey);
       return true;
-    } 
+    }
     return false;
   }).sort((a, b) => {
-    return a.length - b.length;
+    return a.key.length - b.key.length;
   });
 
-  const termsWithMatchingDescription = allTerms.filter(term => {
+  const termsWithMatchingDescription = allTerms.filter(namespacedKey => {
 
-    if (markedTerms.has(term)) {
+    const fullkey = `${namespacedKey.namespace}:${namespacedKey.key}`
+
+    if (markedTerms.has(fullkey)) {
       return false;
     }
 
-    const v = get(term);
+    const { key, namespace } = namespacedKey;
+
+    const v = get(key, namespace);
 
     if (typeof v !== 'undefined' && v.match(hasRegex) !== null) {
-      markedTerms.add(term);
+      markedTerms.add(fullkey);
       return true;
     }
     return false;
   }).sort();
 
-  const termsResult = [
-    ...termsStartingWithQuery,
-    ...termsWithMatchingTerms,
-    ...termsWithMatchingDescription,
-  ];
+  let termsAdditionalInFullsearch: { namespace: string, key: string }[] = [];
 
-  return termsResult;
+  if (isFullsearch) {
+
+
+    termsAdditionalInFullsearch = allTerms.filter(namespacedKey => {
+
+      const fullkey = `${namespacedKey.namespace}:${namespacedKey.key}`
+
+      if (markedTerms.has(fullkey)) {
+        return false;
+      }
+
+      if (namespacedKey.namespace.startsWith(query)) {
+        markedTerms.add(fullkey);
+        return true;
+      }
+
+      return false;
+    });
+  }
+
+
+
+  const returnObject = {
+    terms: [
+      ...termsStartingWithQuery,
+      ...termsWithMatchingTerms,
+      ...termsWithMatchingDescription,
+      ...termsAdditionalInFullsearch,
+    ],
+    namespaceExists,
+    namespaces: namespaceList,
+  };
+
+  return returnObject;
 }
 
-export function remove(key: string) {
-  const lskey = `${NAMESPACE}:${key}`;
+export function remove(key: string, namespace: string) {
+  const lskey = `${LOCAL_STORAGE_NAMESPACE}:${namespace}:${key}`;
   localStorage.removeItem(lskey);
 }
 
-export function set(key: string, value: any) {
-  const lskey = `${NAMESPACE}:${key}`;
+export function set(key: string, value: any, namespace: string) {
+
+  namespace = namespace.toLowerCase().trim();
+  if (namespace.length === 0) {
+    namespace = 'default';
+  }
+
+  const lskey = `${LOCAL_STORAGE_NAMESPACE}:${namespace}:${key}`;
   const lsvalue = JSON.stringify({ value });
 
   localStorage.setItem(lskey, lsvalue);
 }
 
-export function get(key: string) {
+export function get(key: string, namespace: string) {
 
   const transformedKey = key.trim().toLowerCase();
 
-  const lskey = `${NAMESPACE}:${transformedKey}`;
+  const lskey = `${LOCAL_STORAGE_NAMESPACE}:${namespace}:${transformedKey}`;
 
   const rawItem = localStorage.getItem(lskey);
   if (rawItem === null) {
@@ -145,47 +235,111 @@ export function get(key: string) {
 }
 
 export function doExport() {
-  const prefix = `${NAMESPACE}:`;
+  const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
+
+  const dictionaries: { [key: string]: ExportTerm[] } = {};
 
 
-  const terms = Object.keys(localStorage).filter(x => x.startsWith(prefix)).map(x => {
+  Object.keys(localStorage).filter(lskey => lskey.startsWith(lsprefix)).forEach(lskey => {
 
-    const key = x.substr(prefix.length);
-    const value = get(key);
+    const namespacedKey = lskey.substr(lsprefix.length);
+
+    const colonIdx = namespacedKey.indexOf(':');
+
+    const namespace = namespacedKey.substring(0, colonIdx);
+    const key = namespacedKey.substring(colonIdx + 1, namespacedKey.length);
+
+    const value = get(key, namespace);
 
     const term = key;
     const description = value;
 
+    if (!dictionaries.hasOwnProperty(namespace)) {
+      dictionaries[namespace] = [];
+    }
+
     const exportTerm: ExportTerm = { term, description };
-    
-    return exportTerm;
+
+    dictionaries[namespace].push(exportTerm);
   });
 
   const exportObject: ExportObject = {
-    terms
+    dictionaries: []
   };
 
-  return exportObject;
-}
-
-export function doImport(exportObject: ExportObject) {
-  exportObject.terms.forEach((exportTerm) => {
-    
-    // Replace or merge?
-
-    const { term, description } = exportTerm;
-
-    const key = term;
-    const value = description;
-
-    set(key, value);
+  Object.keys(dictionaries).forEach((namespace) => {
+    const terms = dictionaries[namespace];
+    const subdictionary: ExportSubdictionary = {
+      namespace,
+      terms,
+    }
+    exportObject.dictionaries.push(subdictionary);
   });
 
-  return {};
+  return exportObject as ExportObject;
 }
 
+export function doImport(importObject: ImportObject) {
+
+  if (importObject.hasOwnProperty('dictionary')) {
+    const obj = importObject as ExportObject;
+
+    obj.dictionaries.forEach((dictionary) => {
+      const { namespace, terms } = dictionary;
+
+      terms.forEach((termObject) => {
+        const { term, description } = termObject;
+
+        const key = term;
+        const value = description;
+
+        set(key, value, namespace);
+      });
+    });
+  } else {
+    const obj = importObject as Legacy1ExportObject;
+
+    const { terms } = obj;
+    const namespace = DEFAULT_NAMESPACE;
+
+    terms.forEach((termObject) => {
+      const { term, description } = termObject;
+
+      const key = term;
+      const value = description;
+
+      set(key, value, namespace);
+    });
+  }
+}
+
+export function doesNamespaceExist(namespace: string) {
+
+}
+
+export function getAllNamespaces() {
+
+  const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
+
+  const namespacesSet = new Set<string>();
+
+  Object.keys(localStorage)
+    .filter(lskey => lskey.startsWith(lsprefix))
+    .forEach(lskey => {
+      const namespacedKey = lskey.substr(lsprefix.length);
+
+      const colonIdx = namespacedKey.indexOf(':');
+
+      const namespace = namespacedKey.substring(0, colonIdx);
+      namespacesSet.add(namespace);
+    });
+
+  return namespacesSet;
+}
+
+
 export function clear() {
-  const prefix = `${NAMESPACE}:`;
+  const prefix = `${LOCAL_STORAGE_NAMESPACE}`;
   Object.keys(localStorage).filter(x => x.startsWith(prefix)).forEach((key) => {
     localStorage.removeItem(key);
   });
@@ -195,9 +349,10 @@ export default {
   set,
   get,
   remove,
-  searchTerms,
   searchTermsAndDescriptions,
   doExport,
   doImport,
   clear,
+  doesNamespaceExist,
+  getAllNamespaces,
 };

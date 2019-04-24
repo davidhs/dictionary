@@ -1,0 +1,24 @@
+@import '../../config.scss';
+
+
+.InputText {
+  background-color: pink;
+}
+
+
+.InputText__input {
+  outline: none;
+  border: none;
+
+  display: flex;
+
+  height: 100%;
+
+  border: 1px solid $color-border-soft;
+
+  padding: 4px;
+
+  color: $color-font;
+
+  background-color: $color-window-background;
+}
