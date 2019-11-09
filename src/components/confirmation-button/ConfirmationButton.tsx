@@ -23,7 +23,7 @@ class ConfirmationButton extends React.Component<Props, State> {
     const { onClick: exteriorOnClick } = this.props;
 
     const { confirmationMessage = 'Are you sure?' } = this.props;
-    const response = confirm(confirmationMessage);
+    const response = window.confirm(confirmationMessage);
 
     if (response == true) {
       // Pressed OK
