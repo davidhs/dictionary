@@ -2,28 +2,6 @@
   "name": "dictionary",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@types/jest": "24.0.11",
-    "@types/node": "11.13.6",
-    "@types/react": "16.8.14",
-    "@types/react-dom": "16.8.4",
-    "@types/react-helmet": "^5.0.8",
-    "@types/react-redux": "^7.0.8",
-    "@types/react-router-dom": "^4.3.2",
-    "dotenv": "^7.0.0",
-    "isomorphic-fetch": "^2.2.1",
-    "node-sass": "^4.11.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-helmet": "^5.2.0",
-    "react-redux": "^7.0.2",
-    "react-router": "^5.0.0",
-    "react-router-dom": "^5.0.0",
-    "react-scripts": "2.1.8",
-    "redux": "^4.0.1",
-    "redux-thunk": "^2.3.0",
-    "typescript": "3.4.4"
-  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -39,7 +17,29 @@
     "not ie <= 11",
     "not op_mini all"
   ],
+  "dependencies": {
+    "@types/jest": "^24",
+    "@types/node": "^11",
+    "@types/react": "^16",
+    "@types/react-dom": "^16",
+    "@types/react-helmet": "^5",
+    "@types/react-redux": "^7",
+    "@types/react-router-dom": "^4",
+    "dotenv": "^7",
+    "isomorphic-fetch": "^2",
+    "node-sass": "^4",
+    "react": "^16",
+    "react-dom": "^16",
+    "react-helmet": "^5",
+    "react-redux": "^7",
+    "react-router": "^5",
+    "react-router-dom": "^5",
+    "react-scripts": "^2",
+    "redux": "^4",
+    "redux-thunk": "^2",
+    "typescript": "^3"
+  },
   "devDependencies": {
-    "tslint": "^5.16.0"
+    "tslint": "^5"
   }
 }
