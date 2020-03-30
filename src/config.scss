@@ -1,7 +1,8 @@
-
 // 12 dálka útlit
 
-@import url('https://fonts.googleapis.com/css?family=Noto+Serif|Open+Sans');
+// NOTE(Davíð): had to remove the apostrophes from the URL, otherwise I would
+// get a SASS (or SCSS?) compilation error.
+@import url(https://fonts.googleapis.com/css?family=Noto+Serif|Open+Sans);
 
 // Hámarksbreidd
 $max-width: 1400px;

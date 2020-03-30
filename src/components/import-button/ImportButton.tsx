@@ -12,12 +12,9 @@ interface Props {
   onImport: (text: string) => void;
 }
 
-interface State {
-  
-}
+interface State {}
 
 class ImportButton extends React.Component<Props, State> {
-
   inputElement: HTMLInputElement | null = null;
 
   onClick = () => {
@@ -27,14 +24,12 @@ class ImportButton extends React.Component<Props, State> {
   }
 
   handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-
     const { onImport } = this.props;
 
     const reader = new FileReader();
     reader.onload = function (e2) {
 
       if (e2 && e2.target) {
-
         const { target } = e2 as any;
         
         const text = target.result as string;
@@ -52,7 +47,6 @@ class ImportButton extends React.Component<Props, State> {
   }
 
   render() {
-
     const { children, style } = this.props;
 
     return (

@@ -11,21 +11,18 @@ interface Props {
   confirmationMessage?: string;
 }
 
-interface State {
-
-}
+interface State {}
 
 
 class ConfirmationButton extends React.Component<Props, State> {
 
   onClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-
     const { onClick: exteriorOnClick } = this.props;
 
     const { confirmationMessage = 'Are you sure?' } = this.props;
-    const response = confirm(confirmationMessage);
+    const response = window.confirm(confirmationMessage);
 
-    if (response == true) {
+    if (response === true) {
       // Pressed OK
       if (exteriorOnClick) {
         exteriorOnClick(e);
@@ -36,7 +33,6 @@ class ConfirmationButton extends React.Component<Props, State> {
   }
 
   render() {
-
     const { children, style } = this.props;
 
     return (

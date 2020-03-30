@@ -22,10 +22,7 @@ class Button extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-
     const { onClick = () => { } } = this.props;
-
-    
     const { disabled = false, className = '' } = this.props;
 
     // væri líka hægt að nota `classnames` pakka

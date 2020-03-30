@@ -1,8 +1,6 @@
 @import '../../config.scss';
 
-.SearchResult__item {
-
-}
+.SearchResult__item {}
 
 .SearchResult__button {
 
@@ -19,9 +17,7 @@
   background: #f1f1f1;
   padding: 5px;
 
-
   font-size: $font-size;
-  
 }
 
 .SearchResult__button:hover {

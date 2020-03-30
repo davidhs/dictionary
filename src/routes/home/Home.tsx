@@ -6,7 +6,6 @@ import InputSearch from "../../components/input-search/InputSearch";
 import ImportButton from "../../components/import-button/ImportButton";
 import ExportButton from "../../components/export-button/ExportButton";
 import ConfirmationButton from "../../components/confirmation-button/ConfirmationButton";
-
 import InputText from "../../components/input-text/InputText";
 
 function leftpad(str: string | number, pad: string) {
@@ -28,7 +27,7 @@ function getDateNowString() {
   return ds;
 }
 
-interface Props {}
+interface Props { }
 
 interface State {
   resultText: string;
@@ -64,7 +63,6 @@ class Home extends Component<Props, State> {
 
     const didNotExistBefore = !namespaces.includes(this.state.namespace);
 
-
     if (
       this.state.namespace !== "*" &&
       didNotExistBefore &&
@@ -94,20 +92,15 @@ class Home extends Component<Props, State> {
     };
   }
 
-  // Custom methods
-
   resolveSearch(namespace: string, searchValue: string) {
-
     const { terms } = this.updateTerms(searchValue, namespace);
 
     const resultText = api.get(searchValue, namespace);
 
     if (typeof resultText === "string") {
       this.setState({ resultText });
-    } else {
-      if (this.state.resultText.length > 0) {
-        this.setState({ resultText: "" });
-      }
+    } else if (this.state.resultText.length > 0) {
+      this.setState({ resultText: "" });
     }
 
     if (searchValue.trim().length > 0 && terms.length > 0) {
@@ -266,14 +259,13 @@ class Home extends Component<Props, State> {
           }
         }
       } else {
-        // CREATE NEW DUMBASS
+        // CREATE NEW (???)
         this.setTermDescription(searchValue, resultText);
       }
     }
   };
 
   handleOnSelection = (searchValue: string) => {
-
     const { namespace, namespaces } = this.state;
 
     if (namespaces.includes(namespace) || namespace.trim() === '*') {
@@ -281,8 +273,6 @@ class Home extends Component<Props, State> {
     } else {
       this.setNamespace(searchValue);
     }
-
-
   };
 
   handleOnChangeSearchValue = (searchValue: string) => {
@@ -309,9 +299,6 @@ class Home extends Component<Props, State> {
     this.setNamespace(namespace);
 
     if (namespace.length === 0) {
-
-      const { placeholderText } = this.state;
-
       this.setSearchValue('');
       this.setState({ placeholderText: '' })
     }
@@ -322,7 +309,6 @@ class Home extends Component<Props, State> {
     value: string,
     suggestions: string[]
   ) => {
-
     const { namespace } = this.state;
 
     let lookupValue;
@@ -413,14 +399,11 @@ class Home extends Component<Props, State> {
     return value;
   };
 
-  // Render
-
   render() {
     const {
       searchValue,
       resultText,
       placeholderText,
-      terms,
       flattenedTerms,
       namespace,
       namespaces

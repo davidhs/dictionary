@@ -10,7 +10,6 @@ interface Props {
 class SearchResult extends Component<Props> {
 
   handleClick = () => {
-
     const { term, onSelection } = this.props;
     onSelection(term);
   }

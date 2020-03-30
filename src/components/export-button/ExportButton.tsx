@@ -1,34 +1,25 @@
 import React from 'react'
-import "./ExportButton.scss";
 import Button from '../button/Button';
+import "./ExportButton.scss";
 
 interface Props {
   children: any;
   disabled?: boolean;
   className?: string;
   style?: React.CSSProperties;
-
   getContent?: () => string; // content (href)
   filename?: string; // filename (download)
 }
 
-interface State {
-
-}
-
+interface State {}
 
 class ExportButton extends React.Component<Props, State> {
-
-
   anchor: HTMLAnchorElement | null = null;
 
-
   onClick = () => {
-
     const { getContent, filename } = this.props;
 
     if (this.anchor && getContent && filename ) {
-
       const content = getContent();
 
       // Content here should be a JSON data structure.
@@ -46,7 +37,6 @@ class ExportButton extends React.Component<Props, State> {
   }
 
   render() {
-
     const { children, style } = this.props;
 
     return (

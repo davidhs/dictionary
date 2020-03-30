@@ -6,10 +6,10 @@ interface Props {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-interface State {
-}
+interface State {}
 
 class InputText extends React.Component<Props, State> {
+
   render() {
     const { value, onChange } = this.props;
 

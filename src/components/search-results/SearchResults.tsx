@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./SearchResults.scss";
-import api from "../../api";
+// import api from "../../api";
 import SearchResult from "../search-result/SearchResult";
 
 interface Props {
@@ -13,7 +13,7 @@ interface State {}
 
 class SearchResults extends Component<Props, State> {
   render() {
-    const { onSelection, query, terms } = this.props;
+    const { onSelection, terms } = this.props;
 
     return (
       <div className="SearchResults">

@@ -1,7 +1,7 @@
 import React from "react";
 import "./InputSearch.scss";
-
 import Button from '../button/Button';
+
 
 interface Props {
   onChange?: (value: string) => void;
@@ -37,8 +37,7 @@ const defaultAutocomplete = (e: React.KeyboardEvent<HTMLInputElement>, value: st
   return value;
 }
 
-interface State {
-}
+interface State {}
 
 class InputSearch extends React.Component<Props, State> {
 
@@ -52,7 +51,6 @@ class InputSearch extends React.Component<Props, State> {
   }
 
   handleOnKeyDownSearchValue = (e: React.KeyboardEvent<HTMLInputElement>) => {
-
     const { autocomplete, value, suggestions } = this.props;
 
     if (autocomplete) {
@@ -77,7 +75,6 @@ class InputSearch extends React.Component<Props, State> {
 
 
   render() {
-
     const { value } = this.props;
 
     return (
