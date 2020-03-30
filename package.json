@@ -14,7 +14,6 @@
     "react-helmet": "^5",
     "react-router-dom": "^5",
     "react-scripts": "^3",
-    "redux": "^4",
     "typescript": "^3"
   },
   "browserslist": {
