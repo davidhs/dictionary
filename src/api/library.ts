@@ -5,6 +5,9 @@ import { escapeRegExp, assert } from "./lib";
 
 // TODO: need a much more robust name to define dictionary names.
 
+// TODO: maybe I don't want to put terms in lowercase anymore, just have a simple
+// key-value database (string)
+
 const DEFAULT_NAMESPACE = 'default';
 
 /**
