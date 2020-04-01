@@ -1,45 +1,19 @@
-// TODO: put the dictionary into memory, and keep a copy in local storage.
-
+import { escapeRegExp } from "./lib";
+import Library from "./library";
+import { ExportTerm, ExportObject, ExportSubdictionary, Legacy1ExportObject, ImportObject } from "./types";
 
 const LOCAL_STORAGE_NAMESPACE = 'tu8rbgh8';
-
-// const ALL_PREFIX = `${LOCAL_STORAGE_NAMESPACE}::`;
 
 const DEFAULT_NAMESPACE = 'default';
 
 
-interface ExportTerm {
-  term: string;
-  description: string;
-}
 
-interface Legacy1ExportObject {
-  terms: ExportTerm[];
-}
+const library = new Library(LOCAL_STORAGE_NAMESPACE);
 
-interface ExportSubdictionary {
-  namespace: string;
-  terms: ExportTerm[];
-}
-
-interface ExportObject {
-  dictionaries: ExportSubdictionary[];
-}
+console.info(library);
 
 
-type ImportObject = ExportObject | Legacy1ExportObject;
 
-
-/**
- * A function to escape characters in a string so they won't be treated as
- * meta-characters in the construction of a regular expresion.
- * 
- * @param string 
- */
-function escapeRegExp(string: string) {
-  // $& means the whole matched string
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 /**
  * Search termsn and descriptions
