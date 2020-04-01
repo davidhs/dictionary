@@ -106,6 +106,8 @@ export default class Library {
    * @param paramNamespace 
    */
   public legacy_searchTermsAndDescriptions(paramQuery: string, paramNamespace: string) {
+    // TODO: this function needs to be completely reworked!
+
     const namespace = paramNamespace.trim().toLowerCase();
     const isFullsearch = namespace === '*';
     const query = paramQuery.trim().toLowerCase();
@@ -155,9 +157,11 @@ export default class Library {
 
     const escapedQuery = escapeRegExp(query);
 
+    allTerms.sort((a, b) => a.key.localeCompare(b.key));
+
     if (escapedQuery.length === 0) {
       const returnObject = {
-        terms: allTerms.sort(),
+        terms: allTerms,
         namespaceExists,
         namespaces: namespaceList,
       };
@@ -218,7 +222,7 @@ export default class Library {
       }
 
       return false;
-    }).sort();
+    })
 
     let termsAdditionalInFullsearch: { namespace: string, key: string }[] = [];
 
@@ -238,6 +242,9 @@ export default class Library {
     }
 
     // TODO: this is probably slow...
+
+    // TODO: am I duplicating terms here?
+
     const returnObject = {
       terms: [
         ...termsStartingWithQuery,
