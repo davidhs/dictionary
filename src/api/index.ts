@@ -1,4 +1,4 @@
-import Library from "./library";
+import Library from "./Library";
 
 const LOCAL_STORAGE_NAMESPACE = 'tu8rbgh8';
 

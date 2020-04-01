@@ -1,4 +1,4 @@
-import CachedVault from "./cached-vault";
+import CachedVault from "./CachedVault";
 
 export default class Dictionary {
   private cachedVault: CachedVault<string>;
