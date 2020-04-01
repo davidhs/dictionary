@@ -2,6 +2,13 @@ export default class CachedVault<T> {
   private keyPrefix: string;
   private cache: Map<string, T>;
 
+  /**
+   * TODO: remove `dictionaryNamespace`, and replace `localStorageNamespace`
+   * with `localStorageKeyPrefix`.
+   * 
+   * @param localStorageNamespace 
+   * @param dictionaryNamespace 
+   */
   constructor(localStorageNamespace: string, dictionaryNamespace: string) {
     this.keyPrefix = `${localStorageNamespace}:${dictionaryNamespace}:`;
 
