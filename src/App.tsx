@@ -15,16 +15,13 @@ function App(props: Props) {
   return (
     <React.Fragment>
       <Helmet defaultTitle="Dictionary" />
-
       <div className="App">
-
         <main className="App__main">
           <Switch location={props.location}>
             <Route path="/" exact component={Home} />
             <Route component={NotFound} />
           </Switch>
         </main>
-
       </div>
     </React.Fragment>
   );

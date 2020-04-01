@@ -73,7 +73,6 @@ class InputSearch extends React.Component<Props, State> {
     }
   }
 
-
   render() {
     const { value } = this.props;
 

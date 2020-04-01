@@ -39,16 +39,16 @@ interface State {
   namespaces: string[];
 }
 
-const defaultPlaceholderText = "";
-const defaultNamespace = "default";
+const DEFAULT_PLACEHOLDER_TEXT = "";
+const DEFAULT_NAMESPACE = "default";
 
 class Home extends Component<Props, State> {
   state: State = {
     resultText: "",
     searchValue: "",
-    placeholderText: defaultPlaceholderText,
+    placeholderText: DEFAULT_PLACEHOLDER_TEXT,
     terms: [],
-    namespace: defaultNamespace,
+    namespace: DEFAULT_NAMESPACE,
     flattenedTerms: [],
     namespaces: []
   };
@@ -113,8 +113,8 @@ class Home extends Component<Props, State> {
     } else {
       const { placeholderText } = this.state;
 
-      if (placeholderText !== defaultPlaceholderText) {
-        this.setState({ placeholderText: defaultPlaceholderText });
+      if (placeholderText !== DEFAULT_PLACEHOLDER_TEXT) {
+        this.setState({ placeholderText: DEFAULT_PLACEHOLDER_TEXT });
       }
     }
 
@@ -366,8 +366,8 @@ class Home extends Component<Props, State> {
           }
         } else if (namespace === "*") {
           // Degenerate case
-
           e.preventDefault();
+
           return topSuggestion;
         } else {
           if (

@@ -1,3 +1,6 @@
+// TODO: put the dictionary into memory, and keep a copy in local storage.
+
+
 const LOCAL_STORAGE_NAMESPACE = 'tu8rbgh8';
 
 // const ALL_PREFIX = `${LOCAL_STORAGE_NAMESPACE}::`;
@@ -27,12 +30,23 @@ interface ExportObject {
 type ImportObject = ExportObject | Legacy1ExportObject;
 
 
-
+/**
+ * A function to escape characters in a string so they won't be treated as
+ * meta-characters in the construction of a regular expresion.
+ * 
+ * @param string 
+ */
 function escapeRegExp(string: string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  // $& means the whole matched string
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-
+/**
+ * Search termsn and descriptions
+ * 
+ * @param paramQuery 
+ * @param paramNamespace 
+ */
 export function searchTermsAndDescriptions(paramQuery: string, paramNamespace: string) {
   const namespace = paramNamespace.trim().toLowerCase();
   const isFullsearch = namespace === '*';
@@ -40,6 +54,10 @@ export function searchTermsAndDescriptions(paramQuery: string, paramNamespace: s
   const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
   let namespaceExists = false;
   const namespacesSet = new Set<string>();
+
+  ///////////////////////
+  // Pick up all terms //
+  ///////////////////////
 
   const allTerms = Object.keys(localStorage)
     .filter(lskey => lskey.startsWith(lsprefix))
@@ -51,9 +69,7 @@ export function searchTermsAndDescriptions(paramQuery: string, paramNamespace: s
       const lspnamespace = namespacedKey.substring(0, colonIdx);
       const lspkey = namespacedKey.substring(colonIdx + 1, namespacedKey.length);
 
-      if (namespace === lspnamespace) {
-        namespaceExists = true;
-      }
+      if (namespace === lspnamespace) namespaceExists = true;
 
       namespacesSet.add(lspnamespace);
 
@@ -69,6 +85,10 @@ export function searchTermsAndDescriptions(paramQuery: string, paramNamespace: s
         return true;
       }
     });
+
+  ////////////////////
+  // Filter terms ? //
+  ////////////////////
 
   const namespaceList = Array.from(namespacesSet).sort();
 
@@ -170,6 +190,7 @@ export function searchTermsAndDescriptions(paramQuery: string, paramNamespace: s
     });
   }
 
+  // TODO: this is probably slow...
   const returnObject = {
     terms: [
       ...termsStartingWithQuery,
@@ -184,11 +205,25 @@ export function searchTermsAndDescriptions(paramQuery: string, paramNamespace: s
   return returnObject;
 }
 
+/**
+ * Removes JSON value from local storage with key `key` and namespace
+ * `namespace`.
+ * 
+ * @param key 
+ * @param namespace 
+ */
 export function remove(key: string, namespace: string) {
   const lskey = `${LOCAL_STORAGE_NAMESPACE}:${namespace}:${key}`;
   localStorage.removeItem(lskey);
 }
 
+/**
+ * Sets JSON value in local storage with key `key` and namespace `namespace`.
+ * 
+ * @param key 
+ * @param value 
+ * @param namespace 
+ */
 export function set(key: string, value: any, namespace: string) {
   namespace = namespace.toLowerCase().trim();
 
@@ -202,6 +237,13 @@ export function set(key: string, value: any, namespace: string) {
   localStorage.setItem(lskey, lsvalue);
 }
 
+/**
+ * Fetches JSON value from local storage with key `key` and namespace
+ * `namespace`.
+ * 
+ * @param key 
+ * @param namespace 
+ */
 export function get(key: string, namespace: string) {
   const transformedKey = key.trim().toLowerCase();
   const lskey = `${LOCAL_STORAGE_NAMESPACE}:${namespace}:${transformedKey}`;
@@ -214,6 +256,9 @@ export function get(key: string, namespace: string) {
   }
 }
 
+/**
+ * Export dictionars to JSOn.
+ */
 export function doExport() {
   const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
 
@@ -257,6 +302,11 @@ export function doExport() {
   return exportObject as ExportObject;
 }
 
+/**
+ * Imports dictionaries from JSON.
+ * 
+ * @param importObject 
+ */
 export function doImport(importObject: ImportObject) {
   console.info('Import object:', importObject);
 
@@ -299,10 +349,20 @@ export function doImport(importObject: ImportObject) {
   }
 }
 
+/**
+ * Checkes whether a given namespace exists.
+ * 
+ * @param namespace 
+ */
 export function doesNamespaceExist(namespace: string) {
-  // TODO: implement ?
+  const allNamespaces = getAllNamespaces();
+
+  return allNamespaces.has(namespace);
 }
 
+/**
+ * Returns a set of all the available namespaces.
+ */
 export function getAllNamespaces() {
   const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
 
@@ -312,9 +372,7 @@ export function getAllNamespaces() {
     .filter(lskey => lskey.startsWith(lsprefix))
     .forEach(lskey => {
       const namespacedKey = lskey.substr(lsprefix.length);
-
       const colonIdx = namespacedKey.indexOf(':');
-
       const namespace = namespacedKey.substring(0, colonIdx);
       namespacesSet.add(namespace);
     });
@@ -322,7 +380,11 @@ export function getAllNamespaces() {
   return namespacesSet;
 }
 
-
+/**
+ * Removes all entries in the local storage whose key (a string) starts with
+ * the value in `LOCAL_STORAGE_NAMESPACE`, i.e. removes all entries from the
+ * local storage that are related to this application.
+ */
 export function clear() {
   const prefix = `${LOCAL_STORAGE_NAMESPACE}`;
   Object.keys(localStorage).filter(x => x.startsWith(prefix)).forEach((key) => {

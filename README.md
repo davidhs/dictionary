@@ -10,7 +10,7 @@ This application was written in TypeScript using React.
 
 ## Setup
 
-Make sure you have NPM on your machine, run `npm install`, and then `npm run start` to start this application.  Open `http://localhost:3141` in a browser of your choice.
+Make sure you have NPM on your machine, run `npm install`, and then `npm run start` to start this application.  Open `http://localhost:3000` in a browser of your choice.
 
 ## Screenshot
 
