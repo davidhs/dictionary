@@ -1,14 +1,27 @@
 import CachedVault from "./CachedVault";
+import { Vault } from "./types";
 
+/**
+ * TODO: a dictionary should not concern itself with local storage or name-
+ * spaces (ideally).
+ */
 export default class Dictionary {
-  private cachedVault: CachedVault<string>;
+  private cachedVault: Vault<string>;
   
+  /**
+   * TODO: supply `Dictionary` with some sort of storage object so that it
+   * doesn't have to deal with local storage or anything else per se.
+   * 
+   * @param localStorageNamespace 
+   * @param dictionaryNamespace 
+   */
   constructor(localStorageNamespace: string, dictionaryNamespace: string) {
     this.cachedVault = new CachedVault(localStorageNamespace, dictionaryNamespace);
   }
 
   /**
-   * Retrieves the description for the term, or `undefined`.
+   * Retrieves the description for the term, or `undefined` if the term is not
+   * defined.
    * 
    * @param term 
    */
@@ -17,7 +30,7 @@ export default class Dictionary {
   }
 
   /**
-   * Sets the term with the description
+   * Sets the term with the description.
    * 
    * @param term 
    * @param description 
@@ -27,7 +40,7 @@ export default class Dictionary {
   }
 
   /**
-   * Removes the term if exists or not.
+   * Removes the term if exists.  If it doesn't exist then nothing happens.
    * 
    * @param term 
    */
@@ -36,7 +49,7 @@ export default class Dictionary {
   }
 
   /**
-   * Removes all terms.
+   * Removes all terms and descriptions from this dictionary.
    */
   public clear(): void {
     this.cachedVault.clear();

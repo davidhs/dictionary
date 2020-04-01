@@ -1,4 +1,6 @@
-export default class CachedVault<T> {
+import { VaultSync } from "./types";
+
+export default class CachedVault<T> implements VaultSync<T> {
   private keyPrefix: string;
   private cache: Map<string, T>;
 

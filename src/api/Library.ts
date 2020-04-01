@@ -1,4 +1,4 @@
-import Dictionary from "./dictionary";
+import Dictionary from "./Dictionary";
 import { ExportTerm, ExportObject, ExportSubdictionary, Legacy1ExportObject, ImportObject } from "./types";
 import { escapeRegExp, assert } from "./lib";
 
@@ -13,12 +13,25 @@ const DEFAULT_NAMESPACE = 'default';
 /**
  * The purpose of this class is to be able to probe multiple dictionaries, and
  * keep track of which dictionary is in use, etc.
+ * 
+ * 
  */
 export default class Library {
-
   private dictionaries: Map<string, Dictionary>
   private localStorageNamespace: string;
 
+  /**
+   * TODO: `Library` should NOT concern itself with that it might be using
+   * local storage as its backend, or IndexedDB, or maybe even a remote
+   * storage (SQLite, PostgreSQL).
+   * 
+   * TODO: should be able to use whatever backend storage it sees fit as long 
+   * as the interface for `get`, `set`, and `remove` is synchronous.
+   * 
+   * TODO: supply this with storage method.
+   * 
+   * @param localStorageNamespace 
+   */
   constructor(localStorageNamespace: string) {
     this.dictionaries = new Map();
     this.localStorageNamespace = localStorageNamespace;
@@ -235,6 +248,7 @@ export default class Library {
         const fullkey = `${namespacedKey.namespace}:${namespacedKey.key}`
 
         if (markedTerms.has(fullkey)) return false;
+
         if (namespacedKey.namespace.startsWith(query)) {
           markedTerms.add(fullkey);
           return true;
@@ -271,8 +285,12 @@ export default class Library {
    */
   public legacy_remove(term: string, namespace: string) {
     if (!this.hasDictionary(namespace)) return;
+    
+    // TODO: this is inconvenient.
     const dictionary = this.dictionaries.get(namespace);
+    
     assert(typeof dictionary !== "undefined");
+
     dictionary.remove(term);
   }
 
@@ -338,25 +356,18 @@ export default class Library {
 
       assert(typeof description !== "undefined");
 
-      if (!dictionaries.hasOwnProperty(namespace)) {
-        dictionaries[namespace] = [];
-      }
+      if (!dictionaries.hasOwnProperty(namespace)) dictionaries[namespace] = [];
 
       const exportTerm: ExportTerm = { term, description };
 
       dictionaries[namespace].push(exportTerm);
     });
 
-    const exportObject: ExportObject = {
-      dictionaries: []
-    };
+    const exportObject: ExportObject = { dictionaries: [] };
 
     Object.keys(dictionaries).forEach((namespace) => {
       const terms = dictionaries[namespace];
-      const subdictionary: ExportSubdictionary = {
-        namespace,
-        terms,
-      }
+      const subdictionary: ExportSubdictionary = { namespace, terms };
       exportObject.dictionaries.push(subdictionary);
     });
 
@@ -415,5 +426,4 @@ export default class Library {
 
     return namespacesSet;
   }
-
 }

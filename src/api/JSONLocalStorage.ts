@@ -1,3 +1,6 @@
+import { VaultSync } from "./types";
+
+
 /**
  * Allows you to store JSON data in local storage.
  * 
@@ -5,7 +8,7 @@
  * 
  * WARNING: keys can collide 
  */
-export default class JSONLocalStorage<T> {
+export default class JSONLocalStorage<T> implements VaultSync<T> {
   private keyPrefix: string;
 
   /**

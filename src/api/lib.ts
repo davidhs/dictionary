@@ -20,3 +20,23 @@ export function escapeRegExp(string: string) {
   // $& means the whole matched string
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+
+
+let index = 1;
+
+
+console.log("FIRST", index++);
+
+for (let i = 0; i < 100; ++i) {
+  (new Promise((resolve, reject) => {
+    resolve();
+  })).then(() => {
+    console.log(index++);
+  });
+}
+
+
+
+console.log("LAST", index++);
+
