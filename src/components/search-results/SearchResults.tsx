@@ -1,7 +1,9 @@
 import React, { Component } from "react";
-import "./SearchResults.scss";
-// import api from "../../api";
 import SearchResult from "../search-result/SearchResult";
+
+
+import "./SearchResults.scss";
+
 
 interface Props {
   query?: string;

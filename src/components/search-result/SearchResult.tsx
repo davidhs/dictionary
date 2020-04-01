@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import "./SearchResult.scss";
 import Button from "../button/Button";
+
+import "./SearchResult.scss";
 
 interface Props {
   term: string;
@@ -8,7 +9,6 @@ interface Props {
 }
 
 class SearchResult extends Component<Props> {
-
   handleClick = () => {
     const { term, onSelection } = this.props;
     onSelection(term);

@@ -1,6 +1,7 @@
 import React from "react";
-import "./InputSearch.scss";
 import Button from '../button/Button';
+
+import "./InputSearch.scss";
 
 
 interface Props {

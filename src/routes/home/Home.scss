@@ -5,18 +5,15 @@
   flex-direction: row;
   justify-content: center;
 
-
   height: 100%;
 }
 
 .Home__content {
-
   box-shadow: 0px 0px 10px rgb(207, 207, 207);
   background-color: $color-window-background;
 }
 
 .Home__top {
-
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -47,7 +44,6 @@
   flex-direction: column;
 
   border: 1px solid $color-border-soft;
-
 }
 
 .Home__result {

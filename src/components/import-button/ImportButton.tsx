@@ -1,7 +1,7 @@
 import React from 'react'
+import Button from '../button/Button';
 
 import "./ImportButton.scss";
-import Button from '../button/Button';
 
 interface Props {
   children: any;

@@ -29,10 +29,21 @@ export default class CachedVault<T> {
     return this.cache;
   }
 
+  /**
+   * Retrieves the value for key `key`.
+   * 
+   * @param key 
+   */
   public get(key: string): T | undefined {
     return this.cache.get(key);
   }
 
+  /**
+   * Set key-value
+   * 
+   * @param key 
+   * @param value 
+   */
   public set(key: string, value: T): void {
     ///////////////
     // Set cache //
@@ -50,10 +61,22 @@ export default class CachedVault<T> {
     localStorage.setItem(lskey, lsvalue);
   }
 
+  /**
+   * Remove key
+   * 
+   * @param key 
+   */
   public remove(key: string): void {
     const lskey = `${this.keyPrefix}${key}`;
     localStorage.removeItem(lskey);
   }
 
-  public clear(): void { }
+  /**
+   * Removes all entries.
+   */
+  public clear(): void {
+    Object.keys(localStorage).filter(x => x.startsWith(this.keyPrefix)).forEach((key) => {
+      localStorage.removeItem(key);
+    });
+  }
 }

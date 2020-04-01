@@ -1,6 +1,7 @@
 import React from 'react'
-import "./ConfirmationButton.scss";
 import Button from '../button/Button';
+
+import "./ConfirmationButton.scss";
 
 interface Props {
   children: any;
@@ -15,7 +16,6 @@ interface State {}
 
 
 class ConfirmationButton extends React.Component<Props, State> {
-
   onClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const { onClick: exteriorOnClick } = this.props;
 

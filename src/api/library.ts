@@ -1,16 +1,9 @@
 import Dictionary from "./dictionary";
 import { ExportTerm, ExportObject, ExportSubdictionary, Legacy1ExportObject, ImportObject } from "./types";
+import { escapeRegExp, assert } from "./lib";
 
-/**
- * A function to escape characters in a string so they won't be treated as
- * meta-characters in the construction of a regular expresion.
- * 
- * @param string 
- */
-function escapeRegExp(string: string) {
-  // $& means the whole matched string
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+
+// TODO: need a much more robust name to define dictionary names.
 
 const DEFAULT_NAMESPACE = 'default';
 
@@ -52,72 +45,92 @@ export default class Library {
     }
   }
 
+  /**
+   * 
+   * @param namespace 
+   */
   public hasDictionary(namespace: string): boolean {
     return this.dictionaries.has(namespace);
   }
 
   /**
-   * Returns `true` if dictionary was successfully removed.
+   * Creates a dictionary with the name `namespace`.  If a dictionary with the
+   * same name exists then it throws an error.
    * 
    * @param namespace 
+   * 
+   * @throws
    */
-  public removeDictionary(namespace: string): boolean {
-    const dictionary = this.dictionaries.get(namespace);
+  public createDictionary(namespace: string): void {
+    assert(!this.hasDictionary(namespace));
 
-    if (dictionary) {
-      dictionary.clear();
-      return this.dictionaries.delete(namespace);
-    }
+    const dictionary = new Dictionary(this.localStorageNamespace, namespace);
 
-    return false;
-  }
-
-  public removeEverything(confirmation = false) {
-    if (!confirmation) {
-      return;
-    }
-
-
+    this.dictionaries.set(namespace, dictionary);
   }
 
   /**
-   * Implementation of a legacy function.
+   * Removes as dictionary.  Nothing happens if the dictionary doesn't exist.
    * 
-   * @deprecated
+   * @param namespace 
+   */
+  public removeDictionary(namespace: string) {
+    const dictionary = this.dictionaries.get(namespace);
+
+    if (!dictionary) return;
+
+    dictionary.clear();
+    this.dictionaries.delete(namespace);
+  }
+
+  /**
+   * Removes every single dictionary.
+   */
+  public removeEverything() {
+    // TODO: is this the most robust way to remove everything?
+    const dictionaryNamespaces: string[] = [];
+
+    for (const [dictionaryNamespace, _] of this.dictionaries.entries()) {
+      dictionaryNamespaces.push(dictionaryNamespace);
+    }
+
+    for (const dictionaryNamespace of dictionaryNamespaces) {
+      this.removeDictionary(dictionaryNamespace);
+    }
+  }
+
+  /**
+   * Search termsn and descriptions
    * 
    * @param paramQuery 
    * @param paramNamespace 
    */
   public legacy_searchTermsAndDescriptions(paramQuery: string, paramNamespace: string) {
-    const LOCAL_STORAGE_NAMESPACE = this.localStorageNamespace;
-
-    const get = this.legacy_get;
-
     const namespace = paramNamespace.trim().toLowerCase();
     const isFullsearch = namespace === '*';
     const query = paramQuery.trim().toLowerCase();
-    const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
+    const lsprefix = `${this.localStorageNamespace}:`;
     let namespaceExists = false;
     const namespacesSet = new Set<string>();
-  
+
     ///////////////////////
     // Pick up all terms //
     ///////////////////////
-  
+
     const allTerms = Object.keys(localStorage)
       .filter(lskey => lskey.startsWith(lsprefix))
       .map(lskey => {
         const namespacedKey = lskey.substr(lsprefix.length);
-  
+
         const colonIdx = namespacedKey.indexOf(':');
-  
+
         const lspnamespace = namespacedKey.substring(0, colonIdx);
         const lspkey = namespacedKey.substring(colonIdx + 1, namespacedKey.length);
-  
+
         if (namespace === lspnamespace) namespaceExists = true;
-  
+
         namespacesSet.add(lspnamespace);
-  
+
         return {
           namespace: lspnamespace,
           key: lspkey
@@ -130,111 +143,100 @@ export default class Library {
           return true;
         }
       });
-  
+
     ////////////////////
     // Filter terms ? //
     ////////////////////
-  
+
     const namespaceList = Array.from(namespacesSet).sort();
-  
+
     // If the query starts with `s` and we have multiple terms that start
     // with `s` then those terms should be on the top.
-  
+
     const escapedQuery = escapeRegExp(query);
-  
+
     if (escapedQuery.length === 0) {
       const returnObject = {
         terms: allTerms.sort(),
         namespaceExists,
         namespaces: namespaceList,
       };
-  
+
       return returnObject;
     }
-  
+
     const startsWithRegex = new RegExp(`^${escapedQuery}.*`);
     const notStartsHasRegex = new RegExp(`.+${escapedQuery}.*`);
     const hasRegex = new RegExp(`.*${escapedQuery}.*`);
-  
+
     // Terms that we encounter we "mark" them so that if they're encounted again
     // they are ignored.
     const markedTerms = new Set<string>();
-  
+
+    // TODO: does this result in duplicate results?
+
     // Terms which start with the query string
     const termsStartingWithQuery = allTerms.filter(namespacedKey => {
       const fullkey = `${namespacedKey.namespace}:${namespacedKey.key}`
-  
-      if (markedTerms.has(fullkey)) {
-        return false;
-      }
-  
+
+      if (markedTerms.has(fullkey)) return false;
+
       if (namespacedKey.key.match(startsWithRegex) !== null) {
         markedTerms.add(fullkey);
         return true;
       }
-  
+
       return false;
-    }).sort((a, b) => {
-      return a.key.length - b.key.length;
-    });
-  
+    }).sort((a, b) => a.key.length - b.key.length);
+
     // Later, we want to sort terms by similarity.
-  
+
     const termsWithMatchingTerms = allTerms.filter(namespacedKey => {
       const fullkey = `${namespacedKey.namespace}:${namespacedKey.key}`
-  
-      if (markedTerms.has(fullkey)) {
-        return false;
-      }
-  
+
+      if (markedTerms.has(fullkey)) return false;
+
       if (namespacedKey.key.match(notStartsHasRegex) !== null) {
         markedTerms.add(fullkey);
         return true;
       }
-  
+
       return false;
-    }).sort((a, b) => {
-      return a.key.length - b.key.length;
-    });
-  
+    }).sort((a, b) => a.key.length - b.key.length);
+
     const termsWithMatchingDescription = allTerms.filter(namespacedKey => {
       const fullkey = `${namespacedKey.namespace}:${namespacedKey.key}`
-  
-      if (markedTerms.has(fullkey)) {
-        return false;
-      }
-  
+
+      if (markedTerms.has(fullkey)) return false;
+
       const { key, namespace } = namespacedKey;
-      const v = get(key, namespace);
-  
+      const v = this.legacy_get(key, namespace);
+
       if (typeof v !== 'undefined' && v.match(hasRegex) !== null) {
         markedTerms.add(fullkey);
         return true;
       }
-  
+
       return false;
     }).sort();
-  
+
     let termsAdditionalInFullsearch: { namespace: string, key: string }[] = [];
-  
+
     if (isFullsearch) {
       termsAdditionalInFullsearch = allTerms.filter(namespacedKey => {
-  
+
         const fullkey = `${namespacedKey.namespace}:${namespacedKey.key}`
-  
-        if (markedTerms.has(fullkey)) {
-          return false;
-        }
-  
+
+        if (markedTerms.has(fullkey)) return false;
         if (namespacedKey.namespace.startsWith(query)) {
           markedTerms.add(fullkey);
           return true;
         }
-  
+
         return false;
       });
     }
-  
+
     // TODO: this is probably slow...
     const returnObject = {
       terms: [
@@ -246,81 +248,99 @@ export default class Library {
       namespaceExists,
       namespaces: namespaceList,
     };
-  
+
     return returnObject;
   }
 
-  public legacy_remove(key: string, namespace: string) {
-    const LOCAL_STORAGE_NAMESPACE = this.localStorageNamespace;
-
-    const lskey = `${LOCAL_STORAGE_NAMESPACE}:${namespace}:${key}`;
-
-    localStorage.removeItem(lskey);
+  /**
+   * Removes JSON value from local storage with key `key` and namespace
+   * `namespace`.
+   * 
+   * @param key 
+   * @param namespace 
+   */
+  public legacy_remove(term: string, namespace: string) {
+    if (!this.hasDictionary(namespace)) return;
+    const dictionary = this.dictionaries.get(namespace);
+    assert(typeof dictionary !== "undefined");
+    dictionary.remove(term);
   }
 
-  public legacy_set(key: string, value: any, namespace: string) {
-    const LOCAL_STORAGE_NAMESPACE = this.localStorageNamespace;
+  /**
+   * Sets JSON value in local storage with key `key` and namespace `namespace`.
+   * 
+   * @param key 
+   * @param value 
+   * @param namespace 
+   */
+  public legacy_set(key: string, value: string, namespace: string) {
+    const dictionary = this.dictionaries.get(namespace);
 
-    namespace = namespace.toLowerCase().trim();
+    if (!dictionary) {
+      // Create a new dictionary
+      this.createDictionary(namespace);
 
-    if (namespace.length === 0) {
-      namespace = 'default';
-    }
-  
-    const lskey = `${LOCAL_STORAGE_NAMESPACE}:${namespace}:${key}`;
-    const lsvalue = JSON.stringify({ value });
-  
-    localStorage.setItem(lskey, lsvalue);
-  }
-
-  public legacy_get(key: string, namespace: string) {
-    const LOCAL_STORAGE_NAMESPACE = this.localStorageNamespace;
-
-    const transformedKey = key.trim().toLowerCase();
-    const lskey = `${LOCAL_STORAGE_NAMESPACE}:${namespace}:${transformedKey}`;
-    const rawItem = localStorage.getItem(lskey);
-  
-    if (rawItem === null) {
-      return undefined;
+      // Set value
+      this.legacy_set(key, value, namespace);
     } else {
-      return JSON.parse(rawItem).value;
+      // Set value
+      dictionary.set(key, value);
     }
   }
 
+  /**
+   * Fetches JSON value from local storage with key `key` and namespace
+   * `namespace`.
+   * 
+   * @param key 
+   * @param namespace 
+   */
+  public legacy_get(key: string, namespace: string) {
+    const dictionary = this.dictionaries.get(namespace);
+
+    if (!dictionary) return;
+
+    return dictionary.get(key);
+  }
+
+  /**
+   * Export dictionars to JSOn.
+   */
   public legacy_doExport() {
     const LOCAL_STORAGE_NAMESPACE = this.localStorageNamespace;
-    const get = this.legacy_get;
 
     const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
 
     const dictionaries: { [key: string]: ExportTerm[] } = {};
-  
+
     Object.keys(localStorage).filter(lskey => lskey.startsWith(lsprefix)).forEach(lskey => {
       const namespacedKey = lskey.substr(lsprefix.length);
-  
+
       const colonIdx = namespacedKey.indexOf(':');
-  
+
       const namespace = namespacedKey.substring(0, colonIdx);
       const key = namespacedKey.substring(colonIdx + 1, namespacedKey.length);
-  
-      const value = get(key, namespace);
-  
+
+      const value = this.legacy_get(key, namespace);
+
       const term = key;
       const description = value;
-  
+
+      assert(typeof description !== "undefined");
+
       if (!dictionaries.hasOwnProperty(namespace)) {
         dictionaries[namespace] = [];
       }
-  
+
       const exportTerm: ExportTerm = { term, description };
-  
+
       dictionaries[namespace].push(exportTerm);
     });
-  
+
     const exportObject: ExportObject = {
       dictionaries: []
     };
-  
+
     Object.keys(dictionaries).forEach((namespace) => {
       const terms = dictionaries[namespace];
       const subdictionary: ExportSubdictionary = {
@@ -329,87 +349,61 @@ export default class Library {
       }
       exportObject.dictionaries.push(subdictionary);
     });
-  
+
     return exportObject as ExportObject;
   }
 
+  /**
+   * Imports dictionaries from JSON.
+   * 
+   * @param importObject 
+   */
   public legacy_doImport(importObject: ImportObject) {
-    const set = this.legacy_set;
-
-    console.info('Import object:', importObject);
-
     if (importObject.hasOwnProperty('dictionaries')) {
       const obj = importObject as ExportObject;
-  
       const { dictionaries } = obj;
-  
-      console.info('Dictionaries:', dictionaries);
-  
+
       dictionaries.forEach((dictionary) => {
-  
-        console.info('dictionary: ', dictionary);
-  
         const { namespace, terms } = dictionary;
-  
+
         terms.forEach((termObject) => {
           const { term, description } = termObject;
-  
+
           const key = term;
           const value = description;
-  
-          set(key, value, namespace);
+
+          // WHY IS THIS UNDEFINED?
+          this.legacy_set(key, value, namespace);
         });
       });
     } else {
       const obj = importObject as Legacy1ExportObject;
-  
+
       const { terms } = obj;
       const namespace = DEFAULT_NAMESPACE;
-  
+
       terms.forEach((termObject) => {
         const { term, description } = termObject;
-  
+
         const key = term;
         const value = description;
-  
-        set(key, value, namespace);
+
+        this.legacy_set(key, value, namespace);
       });
     }
   }
 
-  public legacy_doesNamespaceExist(namespace: string) {
-    const getAllNamespaces = this.legacy_getAllNamespaces;
-
-    const allNamespaces = getAllNamespaces();
-
-    return allNamespaces.has(namespace);
-  }
-
+  /**
+   * Returns a set of all the available namespaces.
+   */
   public legacy_getAllNamespaces() {
-    const LOCAL_STORAGE_NAMESPACE = this.localStorageNamespace;
-
-    const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
-
     const namespacesSet = new Set<string>();
-  
-    Object.keys(localStorage)
-      .filter(lskey => lskey.startsWith(lsprefix))
-      .forEach(lskey => {
-        const namespacedKey = lskey.substr(lsprefix.length);
-        const colonIdx = namespacedKey.indexOf(':');
-        const namespace = namespacedKey.substring(0, colonIdx);
-        namespacesSet.add(namespace);
-      });
-  
+
+    for (const [dictionaryNamespace, _] of this.dictionaries.entries()) {
+      namespacesSet.add(dictionaryNamespace);
+    }
+
     return namespacesSet;
   }
 
-  public legacy_clear() {
-    const LOCAL_STORAGE_NAMESPACE = this.localStorageNamespace;
-
-    const prefix = `${LOCAL_STORAGE_NAMESPACE}`;
-    Object.keys(localStorage).filter(x => x.startsWith(prefix)).forEach((key) => {
-      localStorage.removeItem(key);
-    });
-  }
 }

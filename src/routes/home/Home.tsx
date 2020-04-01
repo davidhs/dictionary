@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import "./Home.scss";
 import api from "../../api";
 import SearchResults from "../../components/search-results/SearchResults";
 import InputSearch from "../../components/input-search/InputSearch";
@@ -7,6 +6,8 @@ import ImportButton from "../../components/import-button/ImportButton";
 import ExportButton from "../../components/export-button/ExportButton";
 import ConfirmationButton from "../../components/confirmation-button/ConfirmationButton";
 import InputText from "../../components/input-text/InputText";
+
+import "./Home.scss";
 
 function leftpad(str: string | number, pad: string) {
   return String(pad + str).slice(-pad.length);
@@ -57,7 +58,9 @@ class Home extends Component<Props, State> {
     searchValue: string = this.state.searchValue,
     namespace: string = this.state.namespace
   ) {
-    const result = api.searchTermsAndDescriptions(searchValue, namespace);
+    const library = api.getLibrary();
+
+    const result = library.legacy_searchTermsAndDescriptions(searchValue, namespace);
 
     const { terms, namespaceExists, namespaces } = result;
 
@@ -95,7 +98,9 @@ class Home extends Component<Props, State> {
   resolveSearch(namespace: string, searchValue: string) {
     const { terms } = this.updateTerms(searchValue, namespace);
 
-    const resultText = api.get(searchValue, namespace);
+    const library = api.getLibrary();
+
+    const resultText = library.legacy_get(searchValue, namespace);
 
     if (typeof resultText === "string") {
       this.setState({ resultText });
@@ -105,7 +110,7 @@ class Home extends Component<Props, State> {
 
     if (searchValue.trim().length > 0 && terms.length > 0) {
       const key = terms[0].key;
-      const placeholderText = api.get(key, namespace);
+      const placeholderText = library.legacy_get(key, namespace);
 
       if (placeholderText) {
         this.setState({ placeholderText });
@@ -154,15 +159,17 @@ class Home extends Component<Props, State> {
   setTermDescription(title: string, description: string) {
     const { namespace, namespaces } = this.state;
 
+    const library = api.getLibrary();
+
     if (namespaces.includes(namespace)) {
       const key = title.trim().toLowerCase();
       const value = description;
 
       if (key.length > 0) {
         if (value.length > 0) {
-          api.set(key, value, namespace);
+          library.legacy_set(key, value, namespace);
         } else {
-          api.remove(key, namespace);
+          library.legacy_remove(key, namespace);
         }
       }
       this.updateTerms();
@@ -182,9 +189,9 @@ class Home extends Component<Props, State> {
 
         if (key.length > 0) {
           if (value.length > 0) {
-            api.set(key, value, namespace);
+            library.legacy_set(key, value, namespace);
           } else {
-            api.remove(key, namespace);
+            library.legacy_remove(key, namespace);
           }
         }
         this.updateTerms(title, namespace);
@@ -195,9 +202,9 @@ class Home extends Component<Props, State> {
 
       if (key.length > 0) {
         if (value.length > 0) {
-          api.set(key, value, namespace);
+          library.legacy_set(key, value, namespace);
         } else {
-          api.remove(key, namespace);
+          library.legacy_remove(key, namespace);
         }
       }
       this.updateTerms();
@@ -280,17 +287,23 @@ class Home extends Component<Props, State> {
   };
 
   handleOnImport = (text: string) => {
-    api.doImport(JSON.parse(text));
+    const library = api.getLibrary();
+
+    library.legacy_doImport(JSON.parse(text));
     this.updateTerms();
   };
 
   handleOnClearEverything = () => {
-    api.clear();
+    const library = api.getLibrary();
+
+    library.removeEverything();
     this.updateTerms();
   };
 
   handleGetContent = () => {
-    return JSON.stringify(api.doExport());
+    const library = api.getLibrary();
+
+    return JSON.stringify(library.legacy_doExport());
   };
 
   handleOnChangeNamespace = (e: React.ChangeEvent<HTMLInputElement>) => {
