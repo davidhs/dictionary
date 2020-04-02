@@ -1,18 +1,22 @@
-import { VaultSync } from "./types";
+import { Vault } from "../types";
+import LocalStorageVault from "./LocalStorageVault";
 
-export default class CachedVault<T> implements VaultSync<T> {
+/**
+ * Vault which caches has a "front" cache.
+ */
+export default class CachedVault<T> implements Vault<T> {
+  private backendVault: LocalStorageVault;
   private keyPrefix: string;
   private cache: Map<string, T>;
 
   /**
-   * TODO: remove `dictionaryNamespace`, and replace `localStorageNamespace`
-   * with `localStorageKeyPrefix`.
-   * 
-   * @param localStorageNamespace 
-   * @param dictionaryNamespace 
+   * @param keyPrefix 
    */
-  constructor(localStorageNamespace: string, dictionaryNamespace: string) {
-    this.keyPrefix = `${localStorageNamespace}:${dictionaryNamespace}:`;
+  constructor(keyPrefix: string) {
+    // TODO: be able to choose another backend?
+    this.keyPrefix = keyPrefix;
+
+    this.backendVault = new LocalStorageVault();
 
     // A mapping from terms to descriptions (or anything really)
     this.cache = new Map();
@@ -21,11 +25,11 @@ export default class CachedVault<T> implements VaultSync<T> {
     // Read everything into cache //
     ////////////////////////////////
 
-    Object.keys(localStorage).filter(key => key.startsWith(this.keyPrefix)).map(key => key.substring(this.keyPrefix.length, key.length)).forEach((key) => {
+    Object.keys(this.backendVault).filter(key => key.startsWith(this.keyPrefix)).map(key => key.substring(this.keyPrefix.length, key.length)).forEach((key) => {
       const lskey = `${this.keyPrefix}${key}`;
-      const rawItem = localStorage.getItem(lskey);
+      const rawItem = this.backendVault.get(lskey);
 
-      if (rawItem !== null) {
+      if (rawItem) {
         this.cache.set(key, JSON.parse(rawItem).value);
       }
     });
@@ -67,7 +71,7 @@ export default class CachedVault<T> implements VaultSync<T> {
     const lskey = `${this.keyPrefix}${key}`;
     const lsvalue = JSON.stringify({ value });
 
-    localStorage.setItem(lskey, lsvalue);
+    this.backendVault.set(lskey, lsvalue);
   }
 
   /**
@@ -77,15 +81,15 @@ export default class CachedVault<T> implements VaultSync<T> {
    */
   public remove(key: string): void {
     const lskey = `${this.keyPrefix}${key}`;
-    localStorage.removeItem(lskey);
+    this.backendVault.remove(lskey);
   }
 
   /**
    * Removes all entries.
    */
   public clear(): void {
-    Object.keys(localStorage).filter(x => x.startsWith(this.keyPrefix)).forEach((key) => {
-      localStorage.removeItem(key);
+    Object.keys(this.backendVault).filter(x => x.startsWith(this.keyPrefix)).forEach((key) => {
+      this.backendVault.remove(key);
     });
   }
 }

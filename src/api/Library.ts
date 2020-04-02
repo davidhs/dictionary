@@ -1,7 +1,9 @@
 import Dictionary from "./Dictionary";
 import { ExportTerm, ExportObject, ExportSubdictionary, Legacy1ExportObject, ImportObject } from "./types";
 import { escapeRegExp, assert } from "./lib";
+import CachedVault from "./vaults/CachedVault";
 
+import KeyPrefixedJSONStorageMap from "./KeyPrefixedJSONStorageMap";
 
 // TODO: need a much more robust name to define dictionary names.
 
@@ -55,7 +57,15 @@ export default class Library {
         });
 
       namespacesSet.forEach((namespace) => {
-        const dictionary = new Dictionary(localStorageNamespace, namespace);
+        const keyPrefix = `${localStorageNamespace}:${namespace}:`;
+        const vault = new CachedVault<string>(keyPrefix);
+
+        const map = new KeyPrefixedJSONStorageMap(
+          `${localStorageNamespace}:${namespace}:`,
+          localStorage
+        )
+
+        const dictionary = new Dictionary(vault);
         this.dictionaries.set(namespace, dictionary);
       });
     }
@@ -80,7 +90,10 @@ export default class Library {
   public createDictionary(namespace: string): void {
     assert(!this.hasDictionary(namespace));
 
-    const dictionary = new Dictionary(this.localStorageNamespace, namespace);
+    const keyPrefix = `${this.localStorageNamespace}:${namespace}:`;
+    const vault = new CachedVault<string>(keyPrefix);
+
+    const dictionary = new Dictionary(vault);
 
     this.dictionaries.set(namespace, dictionary);
   }

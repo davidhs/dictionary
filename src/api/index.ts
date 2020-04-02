@@ -4,6 +4,8 @@ const LOCAL_STORAGE_NAMESPACE = 'tu8rbgh8';
 
 const library = new Library(LOCAL_STORAGE_NAMESPACE);
 
+
+// Debug stuff
 // @ts-ignore
 window.library = library;
 

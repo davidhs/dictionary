@@ -19,9 +19,14 @@ export interface ExportObject {
 export type ImportObject = ExportObject | Legacy1ExportObject;
 
 /**
- * Synchronous frontend for the vault.
+ * A vault is a storage with a synchronous frontend.
+ * 
+ * The backend should always be ready!
+ * 
+ * The backend of a vault can be synchronous or asynchronous, it really
+ * shouldn't matter.
  */
-interface VaultFrontend<T> {
+export interface Vault<T> {
   /**
    * Returns value of entry with key `key` if exists, otherwise returns
    * `undefined`.
@@ -44,26 +49,4 @@ interface VaultFrontend<T> {
   clear: () => void;
 }
 
-/**
- * Vault with synchronous frontend and ***synchronous*** backend.
- */
-export interface VaultSync<T> extends VaultFrontend<T> {}
-
-/**
- * Vault with synchronous frontend and ***asynchronous*** backend.
- */
-export interface VaultAsync<T> extends VaultFrontend<T> {
-
-  /**
-   * Once processing the backend is done then the returned promise should 
-   * resolve.
-   * 
-   * Resolves to `true` if successful, otherwise `false`
-   */
-  ready: () => Promise<boolean>;
-}
-
-/**
- * A vault with either a synchronous or asynchronous backend.
- */
-export type Vault<T> = VaultSync<T> | VaultAsync<T>;
+export type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
