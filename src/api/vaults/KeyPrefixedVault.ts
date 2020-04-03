@@ -4,34 +4,54 @@ import { Vault } from "../types";
  * Wrapper Key-prefixed vault.
  */
 export default class KeyPrefixedVault<T> implements Vault<T> {
-  private backendVault: Vault<T>;
-  private keyPrefix: string;
+  #backendVault: Vault<T>;
+  #keyPrefix: string;
 
   constructor(backendVault: Vault<T>, keyPrefix: string) {
-    this.backendVault = backendVault;
-    this.keyPrefix = keyPrefix;
+    this.#backendVault = backendVault;
+    this.#keyPrefix = keyPrefix;
   }
 
   public get(key: string) {
-    const prefixedKey = `${this.keyPrefix}${key}`;
+    const prefixedKey = `${this.#keyPrefix}${key}`;
 
-    const x = new Map();
+    return this.#backendVault.get(prefixedKey);
+  }
 
-    x.values
+  size() {
+    return this.#backendVault.size();
+  }
 
-    return this.backendVault.get(prefixedKey);
+  has(key: string) {
+    const prefixedKey = `${this.#keyPrefix}${key}`;
+
+    return this.#backendVault.has(prefixedKey);
+  }
+
+  keys() {
+    // TODO: I don't know if this is correctly implemented.
+    const keys: string[] = [];
+
+    this.#backendVault.keys()
+      .filter(x => x.startsWith(this.#keyPrefix))
+      .forEach((key) => {
+        const unprefixedKey = key.substring(this.#keyPrefix.length);
+        keys.push(unprefixedKey);
+      });
+
+    return keys;
   }
 
   set(key: string, value: T) {
-    const prefixedKey = `${this.keyPrefix}${key}`;
+    const prefixedKey = `${this.#keyPrefix}${key}`;
 
-    this.backendVault.set(prefixedKey, value);
+    this.#backendVault.set(prefixedKey, value);
   }
 
   remove(key: string) {
-    const prefixedKey = `${this.keyPrefix}${key}`;
+    const prefixedKey = `${this.#keyPrefix}${key}`;
 
-    this.backendVault.remove(prefixedKey);
+    this.#backendVault.remove(prefixedKey);
   }
 
   /**
@@ -39,8 +59,10 @@ export default class KeyPrefixedVault<T> implements Vault<T> {
    */
   clear() {
     // NOTE: we must ONLY delete entries whose key is correctly prefixed!
-    Object.keys(this.backendVault).filter(x => x.startsWith(this.keyPrefix)).forEach((key) => {
-      this.backendVault.remove(key);
-    });
+    this.#backendVault.keys()
+      .filter(x => x.startsWith(this.#keyPrefix))
+      .forEach((key) => {
+        this.#backendVault.remove(key);
+      });
   }
 }

@@ -9,7 +9,7 @@ import { Vault, JSONValue } from "../types";
  * WARNING: keys can collide 
  */
 export default class JSONVault implements Vault<JSONValue> {
-  private backendVault: Vault<string>;
+  #backendVault: Vault<string>;
 
   /**
    * Construct new JSON local storage.
@@ -17,7 +17,7 @@ export default class JSONVault implements Vault<JSONValue> {
    * TODO: extend underlaying vault capabilities?
    */
   constructor(backendVault: Vault<string>) {
-    this.backendVault = backendVault;
+    this.#backendVault = backendVault;
   }
 
   /**
@@ -26,13 +26,25 @@ export default class JSONVault implements Vault<JSONValue> {
    * @param key 
    */
   public get(key: string): JSONValue | undefined {
-    const result = this.backendVault.get(key);
+    const result = this.#backendVault.get(key);
 
     if (result) {
-      return JSON.parse(result).value as JSONValue;
+      return JSON.parse(result) as JSONValue;
     } else {
       return undefined;
     }
+  }
+
+  has(key: string) {
+    return this.#backendVault.has(key);
+  }
+
+  size() {
+    return this.#backendVault.size();
+  }
+
+  keys() {
+    return this.#backendVault.keys();
   }
 
   /**
@@ -42,7 +54,7 @@ export default class JSONVault implements Vault<JSONValue> {
    * @param value 
    */
   public set(key: string, value: JSONValue): void {
-    this.backendVault.set(key, JSON.stringify({ value }));
+    this.#backendVault.set(key, JSON.stringify(value));
   }
 
   /**
@@ -51,13 +63,13 @@ export default class JSONVault implements Vault<JSONValue> {
    * @param key 
    */
   public remove(key: string): void {
-    this.backendVault.remove(key);
+    this.#backendVault.remove(key);
   }
 
   /**
    * Removes all items.
    */
   public clear(): void {
-    this.backendVault.clear();
+    this.#backendVault.clear();
   }
 }

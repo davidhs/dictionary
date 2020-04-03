@@ -3,8 +3,6 @@ import { ExportTerm, ExportObject, ExportSubdictionary, Legacy1ExportObject, Imp
 import { escapeRegExp, assert } from "./lib";
 import CachedVault from "./vaults/CachedVault";
 
-import KeyPrefixedJSONStorageMap from "./KeyPrefixedJSONStorageMap";
-
 // TODO: need a much more robust name to define dictionary names.
 
 // TODO: maybe I don't want to put terms in lowercase anymore, just have a simple
@@ -19,8 +17,8 @@ const DEFAULT_NAMESPACE = 'default';
  * 
  */
 export default class Library {
-  private dictionaries: Map<string, Dictionary>
-  private localStorageNamespace: string;
+  #dictionaries: Map<string, Dictionary>
+  #localStorageNamespace: string;
 
   /**
    * TODO: `Library` should NOT concern itself with that it might be using
@@ -35,8 +33,8 @@ export default class Library {
    * @param localStorageNamespace 
    */
   constructor(localStorageNamespace: string) {
-    this.dictionaries = new Map();
-    this.localStorageNamespace = localStorageNamespace;
+    this.#dictionaries = new Map();
+    this.#localStorageNamespace = localStorageNamespace;
 
     //////////////////////////////
     // Load in all dictionaries //
@@ -60,13 +58,8 @@ export default class Library {
         const keyPrefix = `${localStorageNamespace}:${namespace}:`;
         const vault = new CachedVault<string>(keyPrefix);
 
-        const map = new KeyPrefixedJSONStorageMap(
-          `${localStorageNamespace}:${namespace}:`,
-          localStorage
-        )
-
         const dictionary = new Dictionary(vault);
-        this.dictionaries.set(namespace, dictionary);
+        this.#dictionaries.set(namespace, dictionary);
       });
     }
   }
@@ -76,7 +69,7 @@ export default class Library {
    * @param namespace 
    */
   public hasDictionary(namespace: string): boolean {
-    return this.dictionaries.has(namespace);
+    return this.#dictionaries.has(namespace);
   }
 
   /**
@@ -90,12 +83,12 @@ export default class Library {
   public createDictionary(namespace: string): void {
     assert(!this.hasDictionary(namespace));
 
-    const keyPrefix = `${this.localStorageNamespace}:${namespace}:`;
+    const keyPrefix = `${this.#localStorageNamespace}:${namespace}:`;
     const vault = new CachedVault<string>(keyPrefix);
 
     const dictionary = new Dictionary(vault);
 
-    this.dictionaries.set(namespace, dictionary);
+    this.#dictionaries.set(namespace, dictionary);
   }
 
   /**
@@ -104,26 +97,20 @@ export default class Library {
    * @param namespace 
    */
   public removeDictionary(namespace: string) {
-    const dictionary = this.dictionaries.get(namespace);
+    const dictionary = this.#dictionaries.get(namespace);
 
     if (!dictionary) return;
 
     dictionary.clear();
-    this.dictionaries.delete(namespace);
+
+    this.#dictionaries.delete(namespace);
   }
 
   /**
    * Removes every single dictionary.
    */
   public removeEverything() {
-    // TODO: is this the most robust way to remove everything?
-    const dictionaryNamespaces: string[] = [];
-
-    for (const [dictionaryNamespace, _] of this.dictionaries.entries()) {
-      dictionaryNamespaces.push(dictionaryNamespace);
-    }
-
-    for (const dictionaryNamespace of dictionaryNamespaces) {
+    for (const dictionaryNamespace of this.#dictionaries.keys()) {
       this.removeDictionary(dictionaryNamespace);
     }
   }
@@ -140,7 +127,7 @@ export default class Library {
     const namespace = paramNamespace.trim().toLowerCase();
     const isFullsearch = namespace === '*';
     const query = paramQuery.trim().toLowerCase();
-    const lsprefix = `${this.localStorageNamespace}:`;
+    const lsprefix = `${this.#localStorageNamespace}:`;
     let namespaceExists = false;
     const namespacesSet = new Set<string>();
 
@@ -300,7 +287,7 @@ export default class Library {
     if (!this.hasDictionary(namespace)) return;
     
     // TODO: this is inconvenient.
-    const dictionary = this.dictionaries.get(namespace);
+    const dictionary = this.#dictionaries.get(namespace);
     
     assert(typeof dictionary !== "undefined");
 
@@ -315,7 +302,7 @@ export default class Library {
    * @param namespace 
    */
   public legacy_set(key: string, value: string, namespace: string) {
-    const dictionary = this.dictionaries.get(namespace);
+    const dictionary = this.#dictionaries.get(namespace);
 
     if (!dictionary) {
       // Create a new dictionary
@@ -337,7 +324,7 @@ export default class Library {
    * @param namespace 
    */
   public legacy_get(key: string, namespace: string) {
-    const dictionary = this.dictionaries.get(namespace);
+    const dictionary = this.#dictionaries.get(namespace);
 
     if (!dictionary) return;
 
@@ -348,7 +335,7 @@ export default class Library {
    * Export dictionars to JSOn.
    */
   public legacy_doExport() {
-    const LOCAL_STORAGE_NAMESPACE = this.localStorageNamespace;
+    const LOCAL_STORAGE_NAMESPACE = this.#localStorageNamespace;
 
     const lsprefix = `${LOCAL_STORAGE_NAMESPACE}:`;
 
@@ -433,7 +420,7 @@ export default class Library {
   public legacy_getAllNamespaces() {
     const namespacesSet = new Set<string>();
 
-    for (const [dictionaryNamespace, _] of this.dictionaries.entries()) {
+    for (const [dictionaryNamespace, _] of this.#dictionaries.entries()) {
       namespacesSet.add(dictionaryNamespace);
     }
 

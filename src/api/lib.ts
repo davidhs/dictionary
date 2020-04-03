@@ -4,7 +4,7 @@
  * @param condition 
  * @param message 
  */
-export function assert(condition: any, message = "Assertion failed"): asserts condition {
+export function assert(condition: boolean, message = "Assertion failed"): asserts condition {
   if (!condition) {
     throw new Error(message);
   }

@@ -47,6 +47,21 @@ export interface Vault<T> {
    * Removes all entries.
    */
   clear: () => void;
+
+  /**
+   * Checks if vault has item with given key.
+   */
+  has: (key: string) => boolean;
+
+  /**
+   * Returns how many entries this vault has.
+   */
+  size: () => number;
+
+  /**
+   * Returns a list of all the keys.
+   */
+  keys: () => string[];
 }
 
 export type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
