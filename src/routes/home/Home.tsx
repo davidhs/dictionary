@@ -296,8 +296,16 @@ class Home extends Component<Props, State> {
   handleOnClearEverything = () => {
     const library = api.getLibrary();
 
+    const n = localStorage.length;
+
     library.removeEverything();
     this.updateTerms();
+
+    if (localStorage.length === n) {
+      // DO HARD RELOAD
+      localStorage.clear();
+      location.reload(true);
+    }
   };
 
   handleGetContent = () => {
