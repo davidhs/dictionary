@@ -1,5 +1,5 @@
 import StorageMap from "../StorageMap";
-import { JSONValue } from "./types";
+import { JSONValue } from "../types";
 
 
 /**

@@ -1,19 +1,17 @@
-import { Vault } from "./types";
-
 /**
  * TODO: a dictionary should not concern itself with local storage or name-
  * spaces (ideally).
  */
 export default class Dictionary {
-  #vault: Vault<string>;
+  #map: Map<string, string>;
   
   /**
    * The vault **must** be ready before constructing a dictionary.
    * 
    * @param vault
    */
-  constructor(vault: Vault<string>) {
-    this.#vault = vault;
+  constructor(map: Map<string, string>) {
+    this.#map = map;
   }
 
   /**
@@ -23,7 +21,7 @@ export default class Dictionary {
    * @param term 
    */
   public get(term: string): string | undefined {
-    return this.#vault.get(term);
+    return this.#map.get(term);
   }
 
   /**
@@ -33,7 +31,7 @@ export default class Dictionary {
    * @param description 
    */
   public set(term: string, description: string): void {
-    this.#vault.set(term, description);
+    this.#map.set(term, description);
   }
 
   /**
@@ -42,13 +40,13 @@ export default class Dictionary {
    * @param term 
    */
   public remove(term: string): void {
-    this.#vault.remove(term);
+    this.#map.delete(term);
   }
 
   /**
    * Removes all terms and descriptions from this dictionary.
    */
   public clear(): void {
-    this.#vault.clear();
+    this.#map.clear();
   }
 }

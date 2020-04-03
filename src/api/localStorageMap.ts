@@ -2,7 +2,6 @@ import StorageMap from "./StorageMap";
 
 
 class LocalStorageMap extends StorageMap {
-  
   constructor() {
     super(localStorage);
   }

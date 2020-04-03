@@ -1,7 +1,8 @@
 import Dictionary from "./Dictionary";
 import { ExportTerm, ExportObject, ExportSubdictionary, Legacy1ExportObject, ImportObject } from "./types";
 import { escapeRegExp, assert } from "./lib";
-import CachedVault from "./vaults/CachedVault";
+import localStorageMap from "./localStorageMap";
+import KeyPrefixedMap from "./KeyPrefixedMap";
 
 // TODO: need a much more robust name to define dictionary names.
 
@@ -45,20 +46,22 @@ export default class Library {
 
       const namespacesSet = new Set<string>();
 
-      Object.keys(localStorage)
-        .filter(lskey => lskey.startsWith(lsprefix))
-        .forEach(lskey => {
-          const namespacedKey = lskey.substr(lsprefix.length);
-          const colonIdx = namespacedKey.indexOf(':');
-          const namespace = namespacedKey.substring(0, colonIdx);
-          namespacesSet.add(namespace);
-        });
+      for (const key of localStorageMap.keys()) {
+        if (!key.startsWith(lsprefix)) continue;
+
+        const nskey = key.substr(lsprefix.length);
+        const colonIdx = nskey.indexOf(':');
+        const namespace = nskey.substring(0, colonIdx);
+        namespacesSet.add(namespace);
+      }
 
       namespacesSet.forEach((namespace) => {
         const keyPrefix = `${localStorageNamespace}:${namespace}:`;
-        const vault = new CachedVault<string>(keyPrefix);
 
-        const dictionary = new Dictionary(vault);
+        const map = new KeyPrefixedMap<string>(localStorageMap, keyPrefix);
+
+        const dictionary = new Dictionary(map);
+
         this.#dictionaries.set(namespace, dictionary);
       });
     }
@@ -84,9 +87,9 @@ export default class Library {
     assert(!this.hasDictionary(namespace));
 
     const keyPrefix = `${this.#localStorageNamespace}:${namespace}:`;
-    const vault = new CachedVault<string>(keyPrefix);
+    const map = new KeyPrefixedMap<string>(localStorageMap, keyPrefix);
 
-    const dictionary = new Dictionary(vault);
+    const dictionary = new Dictionary(map);
 
     this.#dictionaries.set(namespace, dictionary);
   }
@@ -393,7 +396,6 @@ export default class Library {
           const key = term;
           const value = description;
 
-          // WHY IS THIS UNDEFINED?
           this.legacy_set(key, value, namespace);
         });
       });

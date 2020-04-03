@@ -7,6 +7,7 @@ export default class StorageMap implements Map<string, string> {
 
   get(key: string): string | undefined {
     const item = this.#storage.getItem(key);
+    
     return item === null ? undefined : item;
   }
 
@@ -37,9 +38,7 @@ export default class StorageMap implements Map<string, string> {
   }
 
   * entries(): IterableIterator<[string, string]> {
-    const n = this.#storage.length;
-
-    for (let i = 0; i < n; i += 1) {
+    for (let i = 0; i < this.#storage.length; i += 1) {
       const key = this.#storage.key(i);
 
       if (key === null) continue;
@@ -60,15 +59,21 @@ export default class StorageMap implements Map<string, string> {
   forEach(callbackfn: (value: string, key: string, map: Map<string, string>) => void, thisArg?: any): void {
     if (thisArg) callbackfn.bind(thisArg);
 
-    for (const [key, value] of this.entries()) {
+    for (let i = 0; i < this.#storage.length; i += 1) {
+      const key = this.#storage.key(i);
+
+      if (key === null) continue;
+
+      const value = this.#storage.getItem(key);
+
+      if (value === null) continue;
+
       callbackfn(value, key, this);
     }
   }
 
   * keys(): IterableIterator<string> {
-    const n = this.#storage.length;
-
-    for (let i = 0; i < n; i += 1) {
+    for (let i = 0; i < this.#storage.length; i += 1) {
       const key = this.#storage.key(i);
       
       if (key === null) continue;
@@ -83,9 +88,7 @@ export default class StorageMap implements Map<string, string> {
   }
 
   * values(): IterableIterator<string> {
-    const n = this.#storage.length;
-
-    for (let i = 0; i < n; i += 1) {
+    for (let i = 0; i < this.#storage.length; i += 1) {
       const key = this.#storage.key(i);
       
       if (key === null) continue;
@@ -108,9 +111,7 @@ export default class StorageMap implements Map<string, string> {
   }
 
   *[Symbol.iterator](): IterableIterator<[string, string]> {
-    const n = this.#storage.length;
-
-    for (let i = 0; i < n; i += 1) {
+    for (let i = 0; i < this.#storage.length; i += 1) {
       const key = this.#storage.key(i);
 
       if (key === null) continue;

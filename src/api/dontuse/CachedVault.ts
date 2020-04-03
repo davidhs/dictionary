@@ -1,5 +1,5 @@
 import { Vault } from "../types";
-import StorageVault from "./dontuse/StorageVault";
+import StorageVault from "./StorageVault";
 
 /**
  * Vault which caches has a "front" cache.

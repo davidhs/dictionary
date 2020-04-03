@@ -1,5 +1,5 @@
 import JSONStorageMap from "./JSONStorageMap";
-import { JSONValue } from "./types";
+import { JSONValue } from "../types";
 
 
 /**
