@@ -1,53 +1,27 @@
-/**
- * WARNING: Still under development!
- */
 export default class StorageMap implements Map<string, string> {
-  /**
-   * @private
-   */
   #storage: Storage;
 
-  /**
-   * Defaults 
-   */
   constructor(storage: Storage) {
     this.#storage = storage;
   }
 
-  /**
-   * 
-   * @param key 
-   */
   get(key: string): string | undefined {
     const item = this.#storage.getItem(key);
     return item === null ? undefined : item;
   }
 
-  /**
-   * 
-   * @param key 
-   * @param value 
-   */
   set(key: string, value: string): this {
     this.#storage.setItem(key, value);
 
     return this;
   }
 
-  /**
-   * 
-   * @param key 
-   */
   has(key: string): boolean {
     const item = this.#storage.getItem(key);
 
     return item !== null;
   }
 
-  /**
-   * 
-   * @param key 
-   */
   delete(key: string): boolean {
     const item = this.#storage.getItem(key);
 
@@ -58,27 +32,21 @@ export default class StorageMap implements Map<string, string> {
     return true;
   }
 
-  /**
-   * 
-   */
   clear(): void {
     this.#storage.clear();
   }
 
-  /**
-   * 
-   */
   * entries(): IterableIterator<[string, string]> {
     const n = this.#storage.length;
 
     for (let i = 0; i < n; i += 1) {
       const key = this.#storage.key(i);
 
-      if (!key) continue;
+      if (key === null) continue;
 
       const value = this.#storage.getItem(key);
 
-      if (value === null) throw new Error();
+      if (value === null) continue;
 
       yield [key, value];
     }
@@ -89,11 +57,6 @@ export default class StorageMap implements Map<string, string> {
     };
   }
 
-  /**
-   * 
-   * @param callbackfn 
-   * @param thisArg 
-   */
   forEach(callbackfn: (value: string, key: string, map: Map<string, string>) => void, thisArg?: any): void {
     if (thisArg) callbackfn.bind(thisArg);
 
@@ -102,15 +65,14 @@ export default class StorageMap implements Map<string, string> {
     }
   }
 
-  /**
-   * 
-   */
   * keys(): IterableIterator<string> {
     const n = this.#storage.length;
 
     for (let i = 0; i < n; i += 1) {
       const key = this.#storage.key(i);
-      if (!key) continue;
+      
+      if (key === null) continue;
+
       yield key;
     }
 
@@ -120,20 +82,17 @@ export default class StorageMap implements Map<string, string> {
     };
   }
 
-  /**
-   * 
-   */
   * values(): IterableIterator<string> {
     const n = this.#storage.length;
 
     for (let i = 0; i < n; i += 1) {
       const key = this.#storage.key(i);
       
-      if (!key) continue;
+      if (key === null) continue;
 
       const value = this.#storage.getItem(key);
 
-      if (value === null) throw new Error();
+      if (value === null) continue;
 
       yield value;
     }
@@ -144,27 +103,21 @@ export default class StorageMap implements Map<string, string> {
     };
   }
 
-  /**
-   * TODO: is this the correct way to implement this?
-   */
   get [Symbol.toStringTag]() {
     return 'StorageMap';
   }
 
-  /**
-   * TODO: what is this supposed to do?
-   */
   *[Symbol.iterator](): IterableIterator<[string, string]> {
     const n = this.#storage.length;
 
     for (let i = 0; i < n; i += 1) {
       const key = this.#storage.key(i);
 
-      if (!key) continue;
+      if (key === null) continue;
 
       const value = this.#storage.getItem(key);
 
-      if (value === null) throw new Error();
+      if (value === null) continue;
 
       yield [key, value];
     }
@@ -175,9 +128,6 @@ export default class StorageMap implements Map<string, string> {
     };
   }
 
-  /**
-   * 
-   */
   get size() {
     return this.#storage.length;
   }

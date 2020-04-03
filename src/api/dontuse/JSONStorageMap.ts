@@ -1,4 +1,4 @@
-import StorageMap from "./StorageMap";
+import StorageMap from "../StorageMap";
 import { JSONValue } from "./types";
 
 
@@ -100,7 +100,7 @@ export default class JSONStorageMap implements Map<string, JSONValue> {
    * 
    */
   * keys(): IterableIterator<string> {
-    for (const [key, ] of this.#map.entries()) {
+    for (const [key, _] of this.#map.entries()) {
       yield key;
     }
 

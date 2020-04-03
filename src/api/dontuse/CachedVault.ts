@@ -1,5 +1,5 @@
 import { Vault } from "../types";
-import StorageVault from "./StorageVault";
+import StorageVault from "./dontuse/StorageVault";
 
 /**
  * Vault which caches has a "front" cache.
@@ -28,25 +28,22 @@ export default class CachedVault<T> implements Vault<T> {
     // NOTE: we want to store keys unprefixed in the cache and prefixed in the
     // backend vault.
 
+    
+
     // Here we unprefix the string.
-    Object.keys(this.#backendVault)
+    this.#backendVault.keys()
       .filter(key => key.startsWith(this.#keyPrefix))
       .map(key => key.substring(this.#keyPrefix.length))
       .forEach((key) => {
         const lskey = `${this.#keyPrefix}${key}`;
         const rawItem = this.#backendVault.get(lskey);
 
+        console.info(lskey, key);
+
         if (typeof rawItem !== "undefined") {
           this.#cache.set(key, JSON.parse(rawItem));
         }
       });
-  }
-
-  /**
-   * WARNING: BE VERY CAREFUL!
-   */
-  public getCache() {
-    return this.#cache;
   }
 
   public keys() {
