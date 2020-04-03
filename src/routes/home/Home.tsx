@@ -304,7 +304,7 @@ class Home extends Component<Props, State> {
     if (localStorage.length === n) {
       // DO HARD RELOAD
       localStorage.clear();
-      location.reload(true);
+      window.location.reload(true);
     }
   };
 
